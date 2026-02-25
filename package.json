@@ -1,0 +1,49 @@
+{
+  "name": "artisan-base-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "企业级微前端基础平台脚手架",
+  "workspaces": [
+    "packages/*",
+    "user-docs"
+  ],
+  "scripts": {
+    "dev:main": "npm run dev --workspace=@artisan/main-app",
+    "dev:vue3": "npm run dev --workspace=@artisan/vue3-sub-app",
+    "dev:vue2": "npm run dev --workspace=@artisan/vue2-sub-app",
+    "dev:iframe": "npm run dev --workspace=@artisan/iframe-sub-app",
+    "dev:all": "npm-run-all --parallel dev:main dev:vue3 dev:vue2 dev:iframe",
+    "build:main": "npm run build --workspace=@artisan/main-app",
+    "build:vue3": "npm run build --workspace=@artisan/vue3-sub-app",
+    "build:vue2": "npm run build --workspace=@artisan/vue2-sub-app",
+    "build:iframe": "npm run build --workspace=@artisan/iframe-sub-app",
+    "build:all": "npm-run-all build:main build:vue3 build:vue2 build:iframe",
+    "docs:dev": "npm run dev --workspace=user-docs",
+    "docs:build": "npm run build --workspace=user-docs",
+    "lint": "lerna run lint",
+    "clean": "lerna clean -y && rm -rf node_modules",
+    "bootstrap": "lerna bootstrap",
+    "publish": "lerna publish"
+  },
+  "devDependencies": {
+    "lerna": "^8.1.2",
+    "npm-run-all": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/artisan-base-frontend.git"
+  },
+  "keywords": [
+    "micro-frontend",
+    "qiankun",
+    "vue3",
+    "vue2",
+    "monorepo",
+    "lerna"
+  ],
+  "author": "Artisan Team",
+  "license": "MIT"
+}

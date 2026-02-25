@@ -1,0 +1,14 @@
+{
+  "name": "user-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Artisan 微前端平台文档",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.0.1"
+  }
+}

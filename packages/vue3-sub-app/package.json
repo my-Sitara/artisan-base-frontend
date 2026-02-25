@@ -1,0 +1,22 @@
+{
+  "name": "@artisan/vue3-sub-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vue3 微前端子应用示例",
+  "scripts": {
+    "dev": "vite --port 7080",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.vue"
+  },
+  "dependencies": {
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0",
+    "element-plus": "^2.6.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.1.6",
+    "vite-plugin-qiankun": "^1.0.15"
+  }
+}

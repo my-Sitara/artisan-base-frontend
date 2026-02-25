@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iframe 子应用</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div class="iframe-app">
+    <div class="app-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <h2>iframe 子应用</h2>
+        <span id="modeBadge" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;line-height:18px;color:#fff;background-color:#67C23A;">独立运行</span>
+      </div>
+      <nav class="nav-links">
+        <a href="/" class="active">首页</a>
+        <a href="/list.html">列表</a>
+      </nav>
+    </div>
+    
+    <div class="app-content">
+      <div class="card">
+        <h3>iframe 子应用 - 首页</h3>
+        
+        <div class="info-section">
+          <h4>当前 Token</h4>
+          <input type="text" id="tokenInput" placeholder="暂无 Token" readonly />
+        </div>
+        
+        <div class="info-section">
+          <h4>接收到的消息</h4>
+          <pre id="messagesLog">等待消息...</pre>
+        </div>
+        
+        <div class="actions-section">
+          <h4>跨应用通信</h4>
+          <button class="btn btn-primary" onclick="requestToken()">请求 Token</button>
+          <button class="btn btn-success" onclick="sendMessage()">发送消息到主应用</button>
+          <button class="btn btn-warning" onclick="navigateToVue3()">跳转到 Vue3 子应用</button>
+          <button class="btn btn-info" onclick="navigateToVue2()">跳转到 Vue2 子应用</button>
+          <button class="btn" onclick="navigateToMain()">跳转到主应用首页</button>
+        </div>
+        
+        <div class="actions-section">
+          <h4>高度上报</h4>
+          <button class="btn" onclick="reportHeight()">上报当前高度</button>
+          <span id="heightValue">-</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="/src/bridge.js"></script>
+  <script type="module" src="/src/app.js"></script>
+  <script>
+    // 检测运行模式
+    (function() {
+      var badge = document.getElementById('modeBadge');
+      if (window !== window.top) {
+        badge.textContent = 'iframe 接入';
+        badge.style.backgroundColor = '#E6A23C';
+      }
+    })();
+  </script>
+</body>
+</html>

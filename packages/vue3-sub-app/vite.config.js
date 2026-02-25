@@ -1,0 +1,40 @@
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import qiankun from 'vite-plugin-qiankun'
+import { resolve } from 'path'
+
+const useDevMode = process.env.QIANKUN !== 'true'
+const isQiankunBuild = process.env.QIANKUN === 'true'
+
+export default defineConfig({
+  plugins: [
+    vue(),
+    qiankun('vue3-sub-app', {
+      useDevMode
+    })
+  ],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src')
+    }
+  },
+  define: {
+    // 构建时常量，用于条件导入
+    __QIANKUN_BUILD__: JSON.stringify(isQiankunBuild)
+  },
+  server: {
+    port: 7080,
+    cors: true,
+    origin: 'http://localhost:7080',
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    }
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    rollupOptions: {
+      input: resolve(__dirname, 'index.html')
+    }
+  }
+})
