@@ -5,18 +5,27 @@
   "description": "Vue3 微前端子应用示例",
   "scripts": {
     "dev": "vite --port 7080",
-    "build": "vite build",
+    "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "lint": "eslint src --ext .js,.vue"
+    "lint": "eslint src --ext .js,.vue,.ts,.tsx",
+    "lint:fix": "eslint src --ext .js,.vue,.ts,.tsx --fix",
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "element-plus": "^2.6.1",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
-    "element-plus": "^2.6.1"
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
+    "@types/node": "^25.3.1",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-vue": "^5.0.4",
+    "eslint": "^8.57.1",
+    "eslint-plugin-vue": "^9.33.0",
+    "typescript": "^5.9.3",
     "vite": "^5.1.6",
-    "vite-plugin-qiankun": "^1.0.15"
+    "vite-plugin-qiankun": "^1.0.15",
+    "vue-tsc": "^3.2.5"
   }
 }
