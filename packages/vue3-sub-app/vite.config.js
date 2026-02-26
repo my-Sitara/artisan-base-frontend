@@ -23,9 +23,12 @@ export default defineConfig({
     __QIANKUN_BUILD__: JSON.stringify(isQiankunBuild)
   },
   server: {
+    host: '0.0.0.0',
     port: 7080,
     cors: true,
     origin: 'http://localhost:7080',
+    strictPort: false,
+    open: false,
     headers: {
       'Access-Control-Allow-Origin': '*'
     }

@@ -10,8 +10,11 @@ export default defineConfig({
     }
   },
   server: {
+    host: '0.0.0.0',
     port: 8080,
     cors: true,
+    strictPort: false,
+    open: false,
     headers: {
       'Access-Control-Allow-Origin': '*'
     }

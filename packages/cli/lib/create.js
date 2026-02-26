@@ -119,7 +119,7 @@ async function createSubApp(name, options) {
   const defaultPorts = {
     vue3: '7080',
     vue2: '3000',
-    iframe: '4000'
+    iframe: '9080'
   }
   
   // 收集配置

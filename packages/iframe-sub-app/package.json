@@ -4,7 +4,7 @@
   "private": true,
   "description": "iframe 微前端子应用示例",
   "scripts": {
-    "dev": "vite --port 4000",
+    "dev": "vite --port 9080",
     "build": "vite build",
     "preview": "vite preview"
   },

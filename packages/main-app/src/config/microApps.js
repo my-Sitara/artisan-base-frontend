@@ -50,7 +50,7 @@ export const microApps = [
   {
     id: 'iframe-sub-app',
     name: 'iframe 子应用',
-    entry: '//localhost:4000',
+    entry: '//localhost:9080',
     activeRule: '/iframe',
     container: '#micro-app-container',
     status: 'online',

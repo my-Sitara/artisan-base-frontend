@@ -4,8 +4,11 @@ import { resolve } from 'path'
 export default defineConfig({
   root: './',
   server: {
-    port: 4000,
+    host: '0.0.0.0',
+    port: 9080,
     cors: true,
+    strictPort: false,
+    open: false,
     headers: {
       'Access-Control-Allow-Origin': '*'
     }

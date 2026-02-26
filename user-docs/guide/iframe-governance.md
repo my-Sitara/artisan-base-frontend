@@ -17,7 +17,7 @@ iframe.contentWindow.postMessage(message, targetOrigin)
 ```javascript
 // 主应用
 const allowedOrigins = [
-  'http://localhost:4000',
+  'http://localhost:9080'
   'https://your-domain.com'
 ]
 

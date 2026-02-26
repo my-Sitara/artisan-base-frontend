@@ -8,7 +8,7 @@ class IframeBridge {
       'http://localhost:8080',
       'http://localhost:7080',
       'http://localhost:3000',
-      'http://localhost:4000'
+      'http://localhost:9080'
     ]
     
     this.token = ''
