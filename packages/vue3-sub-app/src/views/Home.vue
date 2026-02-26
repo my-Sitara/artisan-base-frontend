@@ -1,5 +1,5 @@
 <template>
-  <div class="home-page">
+  <div class="home-page3">
     <el-card>
       <template #header>
         <span>Vue3 子应用 - 首页</span>
@@ -134,8 +134,9 @@ function navigateToMain() {
 </script>
 
 <style scoped>
-.home-page {
+.home-page3 {
   max-width: 800px;
+  padding: 0;
 }
 
 .info-section {
