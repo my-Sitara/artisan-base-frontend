@@ -7,7 +7,7 @@ module.exports = defineConfig({
   devServer: {
     host: '0.0.0.0',
     port: 3000,
-    disableHostCheck: true,
+    allowedHosts: 'all', // 兼容云IDE环境
     headers: {
       'Access-Control-Allow-Origin': '*'
     }
