@@ -109,14 +109,7 @@ class MicroAppManager {
         sandbox: {
           experimentalStyleIsolation: true
         },
-        singular: false,
-        // 排除子应用的 Element Plus/UI 全局 CSS，避免与主应用样式冲突
-        // 子应用在 qiankun 模式下复用主应用的 UI 框架样式
-        excludeAssetFilter: (url) => {
-          // 精确匹配 Element Plus 和 Element UI 的全局样式文件
-          return /element-plus\/dist\/index\.css/.test(url) || 
-                 /element-ui\/lib\/theme-chalk\/index\.css/.test(url)
-        }
+        singular: false
       })
 
       // 记录应用

@@ -2,10 +2,18 @@ import { createApp } from 'vue'
 import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
 import { renderWithQiankun, qiankunWindow } from 'vite-plugin-qiankun/dist/helper'
 import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
 
 import App from './App.vue'
 import routes from './router'
+
+// qiankun 模式下不加载 Element Plus CSS
+// 原因：Vite dev 模式通过 JS/HMR 注入 CSS，绕过了 qiankun 的 experimentalStyleIsolation，
+// Element Plus 的全局选择器 (*, :root, html, body) 会直接污染主应用样式。
+// qiankun 模式下子应用复用主应用的全局 Element Plus CSS（class name 一致，样式共享）。
+// 独立运行时（如直接访问 localhost:7080）才需要自己加载样式。
+if (!qiankunWindow.__POWERED_BY_QIANKUN__) {
+  import('element-plus/dist/index.css')
+}
 
 let app = null
 let router = null
