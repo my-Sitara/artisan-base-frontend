@@ -11,6 +11,22 @@ class IframeBridge {
       'http://localhost:9080'
     ]
     
+    // 动态添加云IDE环境的origin
+    if (window.parent !== window && window.parent.location && window.parent.location.origin) {
+      const parentOrigin = window.parent.location.origin
+      if (!this.allowedOrigins.includes(parentOrigin)) {
+        this.allowedOrigins.push(parentOrigin)
+      }
+    } else if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
+      // 在iframe中，获取祖先origin
+      for (let i = 0; i < window.location.ancestorOrigins.length; i++) {
+        const ancestorOrigin = window.location.ancestorOrigins[i]
+        if (!this.allowedOrigins.includes(ancestorOrigin)) {
+          this.allowedOrigins.push(ancestorOrigin)
+        }
+      }
+    }
+    
     this.token = ''
     this.instanceId = ''
     this.appId = ''
@@ -40,7 +56,13 @@ class IframeBridge {
       this.appId = payload.appId || ''
       this.parentOrigin = payload.origin || ''
       
+      // 更新允许的origins列表
+      if (payload.allowedOrigins && Array.isArray(payload.allowedOrigins)) {
+        this.allowedOrigins = [...new Set([...this.allowedOrigins, ...payload.allowedOrigins])]
+      }
+      
       console.log('[iframe Bridge] Initialized:', payload)
+      console.log('[iframe Bridge] Allowed origins:', this.allowedOrigins)
       
       // 更新页面显示
       const tokenInput = document.getElementById('tokenInput')
