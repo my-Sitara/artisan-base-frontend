@@ -153,7 +153,7 @@ artisan-base-frontend/
 22. `packages/main-app/src/components/IframeContainer.vue`
 23. `packages/main-app/src/views/Home.vue`
 24. `packages/main-app/src/views/SubAppPage.vue` - 子应用单独接入页面
-25. `packages/main-app/src/views/MultiInstancePage.vue` - 多实例同屏页面
+25. `packages/main-app/src/views/MultiInstancePage.vue` - 多应用同屏页面
 26. `packages/main-app/src/views/AppManagement.vue` - 子应用管理页面
 
 ### 阶段 3: Vue3 子应用 (8 个文件)
@@ -227,7 +227,7 @@ artisan-base-frontend/
 
 ### 1. microAppManager.js 实例管理器
 - 使用 qiankun loadMicroApp API
-- 支持多实例同时加载
+-支持多个应用实例同时加载
 - 支持 lastModified 热更新检测
 - 支持 preload 预加载
 - 支持心跳检测
@@ -278,9 +278,9 @@ artisan-base-frontend/
 - 支持 offline 状态禁止加载
 - 动态路由 `/app/:appId`
 
-### 3. 多实例同屏展示页面 (MultiInstancePage.vue)
+### 3.多应用同屏展示页面 (MultiInstancePage.vue)
 - 同一页面同时加载多个子应用
-- 支持多实例管理
+-支持多个应用实例管理
 - 支持关闭单个实例
 - 支持刷新单个实例
 - 支持 layoutType 控制布局（grid/tabs/split）
@@ -327,7 +327,7 @@ artisan-base-frontend/
 | 主应用 | 8080 |
 | Vue3 子应用 | 7080 |
 | Vue2 子应用 | 3000 |
-| iframe 子应用 | 4000 |
+| iframe子应用 | 9080 |
 
 ## 验证方案
 
@@ -339,14 +339,14 @@ artisan-base-frontend/
    - 主应用: http://localhost:8080
    - Vue3 子应用: http://localhost:7080
    - Vue2 子应用: http://localhost:3000
-   - iframe 子应用: http://localhost:4000
+   - iframe子应用: http://localhost:9080
 
 2. **功能测试**
    - 动态上下线切换
    - token 同步验证
    - 布局切换
    - iframe 通信
-   - 多实例加载
+   - 多应用实例加载
    - 心跳检测
 
 3. **CLI 测试**

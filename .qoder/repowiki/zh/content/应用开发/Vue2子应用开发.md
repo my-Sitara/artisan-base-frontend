@@ -14,7 +14,19 @@
 - [packages/cli/package.json](file://packages/cli/package.json)
 - [packages/cli/bin/artisan.js](file://packages/cli/bin/artisan.js)
 - [user-docs/guide/sub-apps.md](file://user-docs/guide/sub-apps.md)
+- [user-docs/guide/typescript-migration.md](file://user-docs/guide/typescript-migration.md)
+- [packages/vue3-sub-app/.eslintrc.cjs](file://packages/vue3-sub-app/.eslintrc.cjs)
+- [packages/main-app/.eslintrc.cjs](file://packages/main-app/.eslintrc.cjs)
+- [packages/main-app/tsconfig.json](file://packages/main-app/tsconfig.json)
+- [packages/vue3-sub-app/tsconfig.json](file://packages/vue3-sub-app/tsconfig.json)
 </cite>
+
+## 更新摘要
+**所做更改**
+- 新增 TypeScript 支持章节，说明 Vue2 子应用的 TypeScript 迁移路径
+- 新增 ESLint 配置章节，介绍代码质量保障机制
+- 更新项目结构章节，反映新增的开发工具链
+- 补充代码规范与质量控制相关内容
 
 ## 目录
 1. [简介](#简介)
@@ -22,14 +34,18 @@
 3. [核心组件](#核心组件)
 4. [架构总览](#架构总览)
 5. [详细组件分析](#详细组件分析)
-6. [依赖关系分析](#依赖关系分析)
-7. [性能考虑](#性能考虑)
-8. [故障排查指南](#故障排查指南)
-9. [结论](#结论)
-10. [附录](#附录)
+6. [TypeScript 支持](#typescript-支持)
+7. [ESLint 配置](#eslint-配置)
+8. [依赖关系分析](#依赖关系分析)
+9. [性能考虑](#性能考虑)
+10. [故障排查指南](#故障排查指南)
+11. [结论](#结论)
+12. [附录](#附录)
 
 ## 简介
 本指南面向在微前端环境中开发与维护 Vue2 子应用的团队，结合仓库中的实际实现，系统讲解项目结构、qiankun 适配器设置、路由与状态管理、组件开发模式、Vue2 与 Vue3 的差异处理、迁移实践以及兼容性测试与性能优化方法。文档以仓库现有代码为依据，避免臆测，确保可操作性与可追溯性。
+
+**更新** 本版本新增了 TypeScript 支持和 ESLint 配置的相关内容，为 Vue2 子应用提供现代化的开发体验。
 
 ## 项目结构
 该仓库采用 Monorepo 架构，使用 Lerna + npm workspace 管理多包。其中与 Vue2 子应用直接相关的关键模块如下：
@@ -82,6 +98,8 @@ RootPkg --> Docs
 - 组件层：App.vue 提供运行模式识别与广播事件监听；Home.vue、List.vue 展示典型页面与交互
 - 构建配置：Vue CLI 配置 UMD 输出、公共路径与跨域头，便于被主应用加载
 - 脚手架：CLI 工具支持快速创建 Vue2 子应用模板
+- **TypeScript 支持**：提供从 JavaScript 到 TypeScript 的迁移路径和配置指南
+- **ESLint 配置**：建立代码质量保障体系，确保团队协作的一致性
 
 **章节来源**
 - [packages/vue2-sub-app/src/main.js](file://packages/vue2-sub-app/src/main.js#L1-L121)
@@ -265,14 +283,132 @@ CLI-->>Dev : 打印结果与日志
 - [packages/cli/bin/artisan.js](file://packages/cli/bin/artisan.js#L1-L53)
 - [packages/cli/package.json](file://packages/cli/package.json#L1-L32)
 
+## TypeScript 支持
+
+### 迁移路径
+Vue2 子应用目前使用 JavaScript 开发，但提供了完整的 TypeScript 迁移路径：
+
+#### 1. 依赖安装
+```bash
+cd packages/vue2-sub-app
+npm install -D typescript @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser
+```
+
+#### 2. 配置文件
+创建 tsconfig.json：
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue"],
+  "exclude": ["node_modules", "dist"]
+}
+```
+
+#### 3. 文件重命名
+- 将 main.js 重命名为 main.ts
+- 将 router/index.js 重命名为 router/index.ts
+- 将 App.vue 中的 script 标签改为 `<script lang="ts">`
+
+#### 4. 类型定义
+为 Vue2 组件添加适当的类型定义，利用 Vue2 的 TS 支持特性。
+
+**章节来源**
+- [user-docs/guide/typescript-migration.md](file://user-docs/guide/typescript-migration.md#L1-L89)
+
+### TypeScript 特性
+- **类型安全**：提供编译时类型检查，减少运行时错误
+- **智能提示**：IDE 支持更好的代码补全和导航
+- **重构安全**：支持安全的代码重构操作
+- **文档化**：类型信息作为代码文档的一部分
+
+## ESLint 配置
+
+### 配置结构
+Vue2 子应用采用与 Vue3 子应用类似的 ESLint 配置策略：
+
+```javascript
+module.exports = {
+  root: true,
+  env: {
+    browser: true,
+    es2021: true,
+    node: true
+  },
+  extends: [
+    'eslint:recommended',
+    'plugin:vue/vue2-recommended',
+    '@typescript-eslint/recommended'
+  ],
+  parser: 'vue-eslint-parser',
+  parserOptions: {
+    ecmaVersion: 'latest',
+    parser: '@typescript-eslint/parser',
+    sourceType: 'module'
+  },
+  plugins: [
+    'vue',
+    '@typescript-eslint'
+  ],
+  rules: {
+    // Vue2 特定规则
+    'vue/multi-word-component-names': 'off',
+    'vue/no-v-html': 'warn',
+    
+    // TypeScript 规则
+    '@typescript-eslint/no-var-requires': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    
+    // 通用规则
+    'no-console': 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
+  }
+}
+```
+
+### 规则定制
+- **Vue2 兼容性**：关闭多词组件名强制要求，适应 Vue2 生态
+- **TypeScript 松散模式**：在开发阶段允许某些 TypeScript 限制，提高开发效率
+- **代码风格**：保持与 Vue3 子应用一致的代码风格标准
+
+### 使用方式
+```bash
+# 运行代码检查
+npm run lint
+
+# 自动修复可修复的问题
+npm run lint -- --fix
+```
+
+**章节来源**
+- [packages/vue3-sub-app/.eslintrc.cjs](file://packages/vue3-sub-app/.eslintrc.cjs#L1-L54)
+- [packages/main-app/.eslintrc.cjs](file://packages/main-app/.eslintrc.cjs#L1-L55)
+
 ## 依赖关系分析
 - Vue2 子应用依赖：Vue 2.7、Vue Router 3、Element UI
 - 主应用依赖：Vue 3、Vue Router 4、Pinia、qiankun、Element Plus
 - CLI 依赖：commander、inquirer、chalk、fs-extra、ora、ejs
+- **TypeScript 依赖**：typescript、@types/node、@typescript-eslint/eslint-plugin
+- **ESLint 依赖**：eslint、eslint-plugin-vue、@typescript-eslint/parser
 
 ```mermaid
 graph TB
 Vue2Pkg["@artisan/vue2-sub-app/package.json"] --> Vue2Dep["vue@^2.7.16<br/>vue-router@^3.6.5<br/>element-ui@^2.15.14"]
+Vue2Pkg --> TSDep["typescript@^5.0.0<br/>@types/node@^20.0.0"]
+Vue2Pkg --> ESLintDep["@typescript-eslint/eslint-plugin@^6.0.0<br/>eslint-plugin-vue@^9.0.0"]
 MainPkg["@artisan/main-app/package.json"] --> Vue3Dep["vue@^3.4.21<br/>vue-router@^4.3.0<br/>pinia@^2.1.7<br/>qiankun@^2.10.16"]
 CLI["@artisan/cli/package.json"] --> CLIdeps["commander<br/>inquirer<br/>chalk<br/>fs-extra<br/>ora<br/>ejs"]
 ```
@@ -293,8 +429,8 @@ CLI["@artisan/cli/package.json"] --> CLIdeps["commander<br/>inquirer<br/>chalk<b
 - 路由模式：qiankun 场景使用 abstract，避免历史记录污染
 - 资源路径：统一 publicPath，确保静态资源正确解析
 - 组件复用：Element UI 按需引入，避免全量引入导致体积增大
-
-[本节为通用建议，无需特定文件引用]
+- **TypeScript 编译**：利用 TypeScript 的类型检查在编译阶段发现潜在问题
+- **ESLint 检查**：在提交前自动检查代码质量，减少运行时错误
 
 ## 故障排查指南
 - 独立运行与 qiankun 模式混用：确认入口中根据运行模式切换路由模式
@@ -302,6 +438,8 @@ CLI["@artisan/cli/package.json"] --> CLIdeps["commander<br/>inquirer<br/>chalk<b
 - 跨域问题：开发阶段允许 CORS，生产环境按需配置
 - 消息广播：监听与移除事件时注意生命周期，避免重复绑定
 - 桥接通信：使用 window.__ARTISAN_BRIDGE__ 进行跨应用跳转与消息发送
+- **TypeScript 类型错误**：检查 tsconfig 配置和类型定义文件
+- **ESLint 规则冲突**：根据项目需求调整 eslint 配置规则
 
 **章节来源**
 - [packages/vue2-sub-app/src/main.js](file://packages/vue2-sub-app/src/main.js#L75-L121)
@@ -309,9 +447,7 @@ CLI["@artisan/cli/package.json"] --> CLIdeps["commander<br/>inquirer<br/>chalk<b
 - [packages/vue2-sub-app/vue.config.js](file://packages/vue2-sub-app/vue.config.js#L7-L12)
 
 ## 结论
-本指南基于仓库现有实现，总结了 Vue2 子应用在微前端环境中的项目结构、构建配置、路由与生命周期适配、组件开发模式与通信机制。遵循这些实践，可在保证兼容性的前提下，稳定地集成与扩展 Vue2 子应用。
-
-[本节为总结，无需特定文件引用]
+本指南基于仓库现有实现，总结了 Vue2 子应用在微前端环境中的项目结构、构建配置、路由与生命周期适配、组件开发模式与通信机制。**更新后的版本**增加了 TypeScript 支持和 ESLint 配置，为 Vue2 子应用提供了现代化的开发体验。遵循这些实践，可在保证兼容性的前提下，稳定地集成与扩展 Vue2 子应用。
 
 ## 附录
 
@@ -320,6 +456,7 @@ CLI["@artisan/cli/package.json"] --> CLIdeps["commander<br/>inquirer<br/>chalk<b
 - 路由模式：Vue2 在 qiankun 下使用 abstract；Vue3 使用 history 并通过插件辅助
 - 状态管理：Vue2 子应用未内置 Pinia；Vue3 主应用使用 Pinia + 持久化
 - 组件生态：Vue2 使用 Element UI；Vue3 使用 Element Plus
+- **开发工具**：Vue2 子应用支持 TypeScript 和 ESLint；Vue3 子应用已具备完整配置
 
 **章节来源**
 - [user-docs/guide/sub-apps.md](file://user-docs/guide/sub-apps.md#L38-L45)
@@ -331,6 +468,7 @@ CLI["@artisan/cli/package.json"] --> CLIdeps["commander<br/>inquirer<br/>chalk<b
 - 组件语法：使用单文件组件的 Vue3 语法与编译器
 - 适配 qiankun：使用 vite-plugin-qiankun，调整入口与生命周期
 - 依赖替换：Element UI 升级为 Element Plus，按需引入
+- **开发工具**：Vue3 子应用已具备完整的 TypeScript 和 ESLint 配置
 
 **章节来源**
 - [user-docs/guide/sub-apps.md](file://user-docs/guide/sub-apps.md#L10-L63)
@@ -342,6 +480,8 @@ CLI["@artisan/cli/package.json"] --> CLIdeps["commander<br/>inquirer<br/>chalk<b
 - 跨应用通信：测试桥接消息发送与跳转功能
 - 卸载清理：确认多次 mount/unmount 不产生内存泄漏
 - 资源加载：检查 publicPath 与静态资源路径
+- **TypeScript 编译**：确认 TypeScript 文件正确编译且无类型错误
+- **ESLint 检查**：验证代码符合项目规范，无严重警告
 
 **章节来源**
 - [packages/vue2-sub-app/src/main.js](file://packages/vue2-sub-app/src/main.js#L75-L121)

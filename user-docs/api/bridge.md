@@ -143,7 +143,8 @@ window.__ARTISAN_BRIDGE__.navigateTo({
 | TOKEN_RESPONSE | Token 响应 |
 | TOKEN_SYNC | Token 同步 |
 | LOGOUT | 登出通知 |
-| REPORT_HEIGHT | 高度上报 (iframe) |
-| PING | 心跳请求 |
-| PONG | 心跳响应 |
+| REPORT_HEIGHT |高度上报 (iframe) |
+| PING |心跳请求 |
+| PONG |心跳响应 |
 | MESSAGE | 通用消息 |
+| UNLOAD |卸通知 (iframe) |

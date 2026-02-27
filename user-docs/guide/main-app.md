@@ -2,14 +2,14 @@
 
 主应用是微前端架构的核心，负责子应用的加载、管理和通信。
 
-## 技术栈
+##技术栈
 
-- Vue 3
-- Vite
-- Vue Router
-- Pinia + 持久化
-- qiankun (loadMicroApp 模式)
-- Element Plus
+- Vue 3.5.29
+- Vite 7.3.1
+- Vue Router 5.0.3
+- Pinia 3.x +持化
+- qiankun (loadMicroApp模式)
+- Element Plus 2.13.2
 
 ## 核心模块
 
@@ -17,7 +17,7 @@
 
 微应用实例管理器，支持：
 
-- 多实例同时加载
+- 多个应用实例同时加载
 - lastModified 热更新检测
 - preload 预加载
 - 心跳检测
@@ -94,11 +94,11 @@ layoutManager.setLayout('tabs', {
 - 支持 reload 刷新
 - 支持上下线切换
 
-### 多实例展示页 (MultiInstancePage.vue)
+### 多应用同屏展示页 (MultiInstancePage.vue)
 
-- 同一页面加载多个子应用
-- 支持多实例管理
-- 支持 grid/tabs/split 布局
+-同一页面加载多个不同子应用
+-支持多个应用实例管理
+- 支持 grid/tabs/split布局
 
 ### 应用管理页 (AppManagement.vue)
 

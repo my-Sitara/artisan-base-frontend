@@ -9,7 +9,16 @@
 - [packages/iframe-sub-app/src/app.js](file://packages/iframe-sub-app/src/app.js)
 - [packages/main-app/src/stores/user.js](file://packages/main-app/src/stores/user.js)
 - [user-docs/guide/iframe-governance.md](file://user-docs/guide/iframe-governance.md)
+- [packages/iframe-sub-app/vite.config.js](file://packages/iframe-sub-app/vite.config.js)
+- [user-docs/guide/deployment.md](file://user-docs/guide/deployment.md)
 </cite>
+
+## 更新摘要
+**变更内容**
+- 新增扩展的 CORS 配置支持，包含更多 HTTP 方法和头部字段
+- 引入动态原点管理功能，支持运行时动态添加允许的源
+- 更新安全策略章节以反映新的 CORS 和动态原点管理特性
+- 增强部署指南中的 CORS 配置说明
 
 ## 目录
 1. [简介](#简介)
@@ -26,6 +35,8 @@
 ## 简介
 本技术文档围绕 iframe 跨域治理展开，系统性阐述以下主题：
 - 安全策略：禁止直接访问 DOM、postMessage 通信机制、Origin 校验与 allowedOrigins 配置
+- 扩展 CORS 配置：支持更多 HTTP 方法和头部字段，提升跨域请求灵活性
+- 动态原点管理：运行时动态添加允许的源，增强系统的适应性和扩展性
 - sandbox 限制：可配置项及其安全效果
 - 内置消息类型：INIT、TOKEN_SYNC、REPORT_HEIGHT、PING/PONG 等的使用场景与交互流程
 - 高度自适应：子应用上报与主应用处理的完整流程
@@ -46,6 +57,7 @@ subgraph "iframe 子应用"
 IA_Bridge["IframeBridge<br/>子应用消息桥"]
 IA_App["app.js<br/>入口逻辑"]
 IA_HTML["index.html<br/>UI 与按钮"]
+IA_Vite["vite.config.js<br/>CORS 配置"]
 end
 MA_IfLoader --> MA_Bridge
 MA_Bridge --> IA_Bridge
@@ -54,21 +66,21 @@ IA_HTML --> IA_App
 MA_UserStore --> MA_Bridge
 ```
 
-图表来源
-- [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L1-L241)
-- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L1-L334)
-- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L1-L216)
+**图表来源**
+- [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L1-L246)
+- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L1-L335)
+- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L1-L238)
 - [packages/iframe-sub-app/src/app.js](file://packages/iframe-sub-app/src/app.js#L1-L72)
 - [packages/iframe-sub-app/index.html](file://packages/iframe-sub-app/index.html#L1-L68)
-- [packages/main-app/src/stores/user.js](file://packages/main-app/src/stores/user.js#L1-L73)
+- [packages/iframe-sub-app/vite.config.js](file://packages/iframe-sub-app/vite.config.js#L1-L27)
 
-章节来源
-- [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L1-L241)
-- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L1-L334)
-- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L1-L216)
+**章节来源**
+- [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L1-L246)
+- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L1-L335)
+- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L1-L238)
 - [packages/iframe-sub-app/src/app.js](file://packages/iframe-sub-app/src/app.js#L1-L72)
 - [packages/iframe-sub-app/index.html](file://packages/iframe-sub-app/index.html#L1-L68)
-- [packages/main-app/src/stores/user.js](file://packages/main-app/src/stores/user.js#L1-L73)
+- [packages/iframe-sub-app/vite.config.js](file://packages/iframe-sub-app/vite.config.js#L1-L27)
 
 ## 核心组件
 - Bridge（主应用）：负责消息监听、Origin 校验、消息分发、广播、导航、token 同步、销毁等。
@@ -76,10 +88,10 @@ MA_UserStore --> MA_Bridge
 - IframeLoader（主应用）：负责 iframe 创建/销毁、sandbox 配置、消息监听、高度自适应、心跳检测、错误处理。
 - UserStore（主应用）：维护 token 并在变更时触发广播或 logout 通知。
 
-章节来源
-- [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L1-L241)
-- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L1-L216)
-- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L1-L334)
+**章节来源**
+- [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L1-L246)
+- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L1-L238)
+- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L1-L335)
 - [packages/main-app/src/stores/user.js](file://packages/main-app/src/stores/user.js#L1-L73)
 
 ## 架构总览
@@ -91,9 +103,10 @@ participant Main as "主应用 Bridge"
 participant Loader as "主应用 IframeLoader"
 participant Sub as "子应用 IframeBridge"
 Note over Loader,Sub : 初始化阶段
-Loader->>Main : sendToIframe(INIT, {token, iframeId, origin})
+Loader->>Main : sendToIframe(INIT, {token, iframeId, origin, allowedOrigins})
 Main->>Sub : 触发 INIT 处理器
 Sub->>Sub : 更新 token/instanceId/appId/parentOrigin
+Sub->>Sub : 动态合并 allowedOrigins 列表
 Sub->>Main : reportHeight()
 Note over Loader,Sub : 运行期心跳
 Loader->>Sub : PING
@@ -103,7 +116,7 @@ Sub->>Main : REPORT_HEIGHT
 Main->>Main : 更新 iframe 高度
 ```
 
-图表来源
+**图表来源**
 - [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L101-L114)
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L94-L118)
 - [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L37-L53)
@@ -111,7 +124,10 @@ Main->>Main : 更新 iframe 高度
 
 ## 详细组件分析
 
-### 安全策略与 Origin 校验
+### 安全策略与扩展 CORS 配置
+
+**更新** 新增扩展的 CORS 配置支持，包含更多 HTTP 方法和头部字段
+
 - 禁止直接访问 DOM：主应用与子应用之间仅通过 postMessage 通信，避免跨域 DOM 直接操作带来的安全风险。
 - Origin 校验：双方均维护 allowedOrigins 列表，在接收消息时校验 event.origin，拒绝不在白名单中的来源。
   - 主应用：允许同源 window.location.origin 作为例外。
@@ -120,11 +136,45 @@ Main->>Main : 更新 iframe 高度
   - 主应用：包含本地开发端口与生产域名。
   - 子应用：包含主应用与其它子应用的开发端口。
 - 目标 origin 设置：sendToIframe 会从 iframe.src 解析目标 origin，避免使用通配符。
+- **新增** 扩展 CORS 配置：
+  - 支持的 HTTP 方法：GET、POST、PUT、DELETE、PATCH、OPTIONS
+  - 支持的头部字段：X-Requested-With、Content-Type、Authorization
+  - 开发环境支持通配符 "*"，生产环境建议指定具体源
 
-章节来源
+**章节来源**
 - [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L96-L101)
 - [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L95-L99)
 - [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L150-L155)
+- [packages/iframe-sub-app/vite.config.js](file://packages/iframe-sub-app/vite.config.js#L12-L16)
+
+### 动态原点管理功能
+
+**更新** 引入动态原点管理功能，支持运行时动态添加允许的源
+
+- **新增** 动态原点管理：子应用启动时会自动检测父窗口的 origin，并将其添加到 allowedOrigins 列表中
+- **新增** 多层级祖先原点支持：支持检测多级 iframe 嵌套情况下的祖先 origin
+- **新增** INIT 消息中的 allowedOrigins 参数：主应用在初始化时会向子应用发送允许的源列表
+- **新增** 运行时动态合并：子应用收到 INIT 消息后会将主应用提供的 allowedOrigins 与本地列表合并，去重后更新
+
+```mermaid
+flowchart TD
+Start(["子应用启动"]) --> DetectParent["检测父窗口 origin"]
+DetectParent --> AddToList["添加到 allowedOrigins 列表"]
+AddToList --> DetectAncestors["检测祖先 origin"]
+DetectAncestors --> MergeOrigins["合并主应用提供的 allowedOrigins"]
+MergeOrigins --> UpdateList["更新允许的源列表"]
+UpdateList --> InitComplete["初始化完成"]
+```
+
+**图表来源**
+- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L14-L28)
+- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L59-L62)
+- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L108)
+
+**章节来源**
+- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L14-L28)
+- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L59-L62)
+- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L108)
 
 ### sandbox 限制
 - 默认 sandbox 配置包含 allow-scripts、allow-same-origin、allow-forms、allow-popups，确保：
@@ -133,13 +183,13 @@ Main->>Main : 更新 iframe 高度
   - 表单提交与弹窗能力可用
 - 可根据业务需求进一步收紧权限，例如移除 allow-scripts 或 allow-popups 以降低风险。
 
-章节来源
+**章节来源**
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L36-L51)
 
 ### 内置消息类型与协议
 - 消息格式：包含 type 与 payload 字段。
 - 内置类型与方向：
-  - INIT：主→子，用于传递 token、iframeId、origin 等初始化信息
+  - INIT：主→子，用于传递 token、iframeId、origin 等初始化信息，**新增** allowedOrigins 参数
   - TOKEN_SYNC：主→子，同步 token
   - TOKEN_RESPONSE：主→子，响应 REQUEST_TOKEN
   - REQUEST_TOKEN：子→主，请求 token
@@ -148,7 +198,7 @@ Main->>Main : 更新 iframe 高度
   - NAVIGATE_TO_MAIN：子→主，跳回主应用
   - PING/PONG：双向，心跳检测
 - 子应用侧默认处理器：
-  - INIT：保存 token/instanceId/appId/parentOrigin，触发上报高度
+  - INIT：保存 token/instanceId/appId/parentOrigin，**更新** 合并 allowedOrigins 列表，触发上报高度
   - TOKEN_SYNC/TOKEN_RESPONSE：更新本地 token
   - PING：返回 PONG
   - RESIZE：日志记录
@@ -158,7 +208,7 @@ Main->>Main : 更新 iframe 高度
   - PONG：日志记录
   - REPORT_HEIGHT：设置 iframe 高度
 
-章节来源
+**章节来源**
 - [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L36-L89)
 - [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L32-L78)
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L144-L171)
@@ -181,11 +231,11 @@ Clamp --> Apply["设置 iframe 高度"]
 Apply --> End(["完成"])
 ```
 
-图表来源
+**图表来源**
 - [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L180-L198)
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L182-L191)
 
-章节来源
+**章节来源**
 - [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L180-L198)
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L182-L191)
 - [packages/iframe-sub-app/src/app.js](file://packages/iframe-sub-app/src/app.js#L52-L70)
@@ -207,11 +257,11 @@ end
 Note over Main : 若超过 60 秒未 PONG -> 标记 unhealthy
 ```
 
-图表来源
+**图表来源**
 - [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L60-L63)
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L215-L231)
 
-章节来源
+**章节来源**
 - [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L60-L63)
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L215-L231)
 
@@ -232,17 +282,17 @@ RemoveDOM --> ClearCache["清空实例缓存"]
 ClearCache --> UEnd(["结束"])
 ```
 
-图表来源
+**图表来源**
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L261-L289)
 
-章节来源
+**章节来源**
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L261-L289)
 
 ### 令牌同步与跨应用跳转
 - 令牌同步：UserStore 登录成功后调用 bridge.syncToken 广播 TOKEN_SYNC；子应用收到后更新本地 token
 - 跨应用跳转：子应用发送 NAVIGATE_TO/NAVIGATE_TO_MAIN，主应用通过路由跳转；同时支持子应用间通过全局事件桥接（参考文档）
 
-章节来源
+**章节来源**
 - [packages/main-app/src/stores/user.js](file://packages/main-app/src/stores/user.js#L16-L23)
 - [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L177-L182)
 - [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L160-L175)
@@ -261,16 +311,16 @@ IframeLoader --> IframeBridge["IframeBridge"]
 IframeApp["子应用 UI/app.js"] --> IframeBridge
 ```
 
-图表来源
-- [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L1-L241)
-- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L1-L334)
-- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L1-L216)
+**图表来源**
+- [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L1-L246)
+- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L1-L335)
+- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L1-L238)
 - [packages/iframe-sub-app/src/app.js](file://packages/iframe-sub-app/src/app.js#L1-L72)
 
-章节来源
-- [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L1-L241)
-- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L1-L334)
-- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L1-L216)
+**章节来源**
+- [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L1-L246)
+- [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L1-L335)
+- [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L1-L238)
 - [packages/iframe-sub-app/src/app.js](file://packages/iframe-sub-app/src/app.js#L1-L72)
 
 ## 性能考量
@@ -278,15 +328,18 @@ IframeApp["子应用 UI/app.js"] --> IframeBridge
 - 心跳周期：30 秒一次 PING，60 秒超时阈值平衡连通性检测与网络开销
 - 高度裁剪：在最小/最大阈值范围内设置高度，避免极端值导致布局抖动
 - 目标 origin：sendToIframe 使用具体 origin，避免通配符带来的潜在安全与性能问题
+- **新增** CORS 预检缓存：合理配置 Access-Control-Max-Age 减少预检请求次数
 
-章节来源
+**章节来源**
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L18-L19)
 - [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L150-L155)
+- [user-docs/guide/deployment.md](file://user-docs/guide/deployment.md#L84-L85)
 
 ## 故障排查指南
 - 无法接收消息
   - 检查 allowedOrigins 是否包含对方 origin
   - 确认消息类型与 payload 结构正确
+  - **新增** 检查 CORS 配置是否支持相应的 HTTP 方法和头部
 - 心跳异常
   - 查看控制台是否有 PING/PONG 日志
   - 检查 IframeLoader 是否标记为 unhealthy
@@ -295,18 +348,25 @@ IframeApp["子应用 UI/app.js"] --> IframeBridge
   - 检查主应用是否开启 autoHeight
 - 卸载后内存泄漏
   - 确认是否调用了 unload，移除了定时器与监听器
+- **新增** CORS 相关问题
+  - 检查浏览器开发者工具 Network 标签页中的预检请求
+  - 确认服务器响应头包含正确的 Access-Control-Allow-* 字段
+  - 验证 HTTP 方法和自定义头部是否在允许列表中
 
-章节来源
+**章节来源**
 - [packages/main-app/src/core/bridge.js](file://packages/main-app/src/core/bridge.js#L96-L101)
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L225-L229)
 - [packages/iframe-sub-app/src/bridge.js](file://packages/iframe-sub-app/src/bridge.js#L180-L198)
 - [packages/main-app/src/core/iframeLoader.js](file://packages/main-app/src/core/iframeLoader.js#L261-L289)
+- [packages/iframe-sub-app/vite.config.js](file://packages/iframe-sub-app/vite.config.js#L12-L16)
 
 ## 结论
-该 iframe 跨域治理方案通过严格的 Origin 校验、明确的 postMessage 协议与 sandbox 限制，构建了安全可控的跨域通信框架。结合心跳检测与高度自适应，实现了稳健的运行期治理能力；完善的卸载清理策略有效避免资源泄漏。建议在生产环境进一步细化 allowedOrigins 与 sandbox 权限，持续监控心跳与高度上报指标，确保跨域子应用的稳定性与安全性。
+该 iframe 跨域治理方案通过严格的 Origin 校验、明确的 postMessage 协议与 sandbox 限制，构建了安全可控的跨域通信框架。**新增的扩展 CORS 配置**支持更多 HTTP 方法和头部字段，提升了系统的灵活性和兼容性。**动态原点管理功能**使系统能够适应复杂的嵌套 iframe 场景，增强了系统的适应性和扩展性。结合心跳检测与高度自适应，实现了稳健的运行期治理能力；完善的卸载清理策略有效避免资源泄漏。建议在生产环境进一步细化 allowedOrigins 与 sandbox 权限，合理配置 CORS 参数，持续监控心跳与高度上报指标，确保跨域子应用的稳定性与安全性。
 
 ## 附录
 - 示例与文档参考：iframe 跨域治理指南文档提供了消息格式、内置类型与最佳实践说明。
+- **新增** 部署指南：包含详细的 CORS 配置示例和最佳实践建议。
 
-章节来源
+**章节来源**
 - [user-docs/guide/iframe-governance.md](file://user-docs/guide/iframe-governance.md#L1-L138)
+- [user-docs/guide/deployment.md](file://user-docs/guide/deployment.md#L67-L86)

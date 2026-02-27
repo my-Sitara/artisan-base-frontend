@@ -15,10 +15,12 @@ iframe.contentWindow.postMessage(message, targetOrigin)
 ### Origin 校验
 
 ```javascript
-// 主应用
+//主应用
 const allowedOrigins = [
-  'http://localhost:9080'
-  'https://your-domain.com'
+  'http://localhost:9080',
+  'https://your-domain.com',
+  //支持动态添加云环境 origin
+  ...dynamicOrigins
 ]
 
 window.addEventListener('message', (event) => {
@@ -128,6 +130,14 @@ function unloadIframe(id) {
   
   // 停止心跳
   clearInterval(instance.heartbeatTimer)
+  
+  // 通知 iframe准卸载
+  if (instance.iframe && instance.iframe.contentWindow) {
+    instance.iframe.contentWindow.postMessage({
+      type: 'UNLOAD',
+      payload: { reason: 'parent_unload' }
+    }, '*')
+  }
   
   // 移除 DOM
   instance.iframe.remove()

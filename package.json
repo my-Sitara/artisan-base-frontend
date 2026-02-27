@@ -26,11 +26,11 @@
     "publish": "lerna publish"
   },
   "devDependencies": {
-    "lerna": "^8.1.2",
+    "lerna": "^9.0.4",
     "npm-run-all": "^4.1.5"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.12.0"
   },
   "repository": {
     "type": "git",

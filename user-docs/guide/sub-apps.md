@@ -57,7 +57,8 @@ export default defineConfig({
   ],
   server: {
     port: 7080,
-    cors: true
+    cors: true,
+    host: '0.0.0.0'
   }
 })
 ```
@@ -103,7 +104,9 @@ export async function unmount() { instance?.$destroy() }
 module.exports = {
   devServer: {
     port: 3000,
-    headers: { 'Access-Control-Allow-Origin': '*' }
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    host: '0.0.0.0',
+    allowedHosts: 'all'
   },
   configureWebpack: {
     output: {
@@ -122,7 +125,12 @@ module.exports = {
 // bridge.js
 class IframeBridge {
   constructor() {
-    this.allowedOrigins = ['http://localhost:8080']
+    //支持动态 origin
+    this.allowedOrigins = [
+      'http://localhost:8080',
+      //支持云环境
+      window.location.origin
+    ].filter(Boolean)
     window.addEventListener('message', this.handleMessage.bind(this))
   }
   
@@ -140,7 +148,10 @@ class IframeBridge {
   
   reportHeight() {
     const height = document.documentElement.scrollHeight
-    this.send({ type: 'REPORT_HEIGHT', payload: { height } })
+    //先bridge准备完成
+    if (window.parent.__ARTISAN_IFRAME_LOADED__) {
+      this.send({ type: 'REPORT_HEIGHT', payload: { height } })
+    }
   }
 }
 ```
