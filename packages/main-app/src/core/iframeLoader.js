@@ -16,6 +16,7 @@ class IframeLoader {
     
     // 防抖的高度更新函数
     this.debouncedResize = debounce(this.handleResize.bind(this), 100)
+  
   }
 
   /**
@@ -99,13 +100,17 @@ class IframeLoader {
 
     // 发送初始化消息
     const userStore = useUserStore()
+    
+    // 动态添加当前origin到allowedOrigins
+    const currentAllowedOrigins = [...bridge.allowedOrigins, window.location.origin]
+    
     bridge.sendToIframe(iframe, {
       type: 'INIT',
       payload: {
         token: userStore.token,
         iframeId: id,
         origin: window.location.origin,
-        allowedOrigins: [window.location.origin, 'http://localhost:8080', 'http://localhost:7080', 'http://localhost:3000', 'http://localhost:9080']
+        allowedOrigins: currentAllowedOrigins
       }
     })
 

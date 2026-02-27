@@ -16,10 +16,10 @@ class Bridge {
       'http://localhost:9080'
     ]
     
-    // // 动态添加云IDE环境的origin
-    // if (window.location.origin && !this.allowedOrigins.includes(window.location.origin)) {
-    //   this.allowedOrigins.push(window.location.origin)
-    // }
+    // 动态添加云IDE环境的origin
+    if (window.location.origin && !this.allowedOrigins.includes(window.location.origin)) {
+      this.allowedOrigins.push(window.location.origin)
+    }
     
     // 消息处理器
     this.handlers = new Map()
