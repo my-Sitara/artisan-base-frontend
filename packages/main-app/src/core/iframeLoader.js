@@ -104,7 +104,8 @@ class IframeLoader {
       payload: {
         token: userStore.token,
         iframeId: id,
-        origin: window.location.origin
+        origin: window.location.origin,
+        allowedOrigins: [window.location.origin, 'http://localhost:8080', 'http://localhost:7080', 'http://localhost:3000', 'http://localhost:9080']
       }
     })
 

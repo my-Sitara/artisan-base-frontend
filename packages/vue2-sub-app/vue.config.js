@@ -9,7 +9,9 @@ module.exports = defineConfig({
     port: 3000,
     allowedHosts: 'all', // 兼容云IDE环境
     headers: {
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers': 'X-Requested-With, Content-Type, Authorization'
     }
   },
   configureWebpack: {
