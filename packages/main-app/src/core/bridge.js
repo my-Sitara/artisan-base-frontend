@@ -8,25 +8,33 @@ import router from '@/router'
  */
 class Bridge {
   constructor() {
-    // 允许的 origin 列表
+    // 允许的 origin列表
     this.allowedOrigins = [
       'http://localhost:8080',
-      'http://localhost:7080',
-      'http://localhost:3000',
-      'http://localhost:9080'
+      // 'http://localhost:7080',
+      // 'http://localhost:3000',
+      // 'http://localhost:9080'
     ]
-    
+
+    //动态匹配规则
+    this.originPatterns = [
+      //匹包含 localhost 的域名
+      /^https?:\/\/localhost(:\d+)?$/,
+      //匹域名后缀包含 .hon.ide.dev.jh 的域名（后面可以跟其他内容）
+      /\.hon\.ide\.dev\.jh/
+    ]
+
     // 动态添加云IDE环境的origin
     if (window.location.origin && !this.allowedOrigins.includes(window.location.origin)) {
       this.allowedOrigins.push(window.location.origin)
     }
-    
+
     // 消息处理器
     this.handlers = new Map()
-    
+
     // 消息监听器是否已设置
     this.isListening = false
-    
+
     // 注册默认处理器
     this.registerDefaultHandlers()
   }
@@ -87,10 +95,10 @@ class Bridge {
    */
   setupListener() {
     if (this.isListening) return
-    
+
     window.addEventListener('message', this.handleMessage.bind(this))
     this.isListening = true
-    
+
     console.log('[Bridge] Message listener setup')
   }
 
@@ -99,14 +107,18 @@ class Bridge {
    * @param {MessageEvent} event 
    */
   handleMessage(event) {
-    // Origin 校验
-    if (!this.allowedOrigins.includes(event.origin) && event.origin !== window.location.origin) {
+    // Origin 校验 - 支持动态匹配规则
+    const isAllowedOrigin = this.allowedOrigins.includes(event.origin) ||
+      event.origin === window.location.origin ||
+      this.originPatterns.some(pattern => pattern.test(event.origin))
+
+    if (!isAllowedOrigin) {
       console.warn('[Bridge] Rejected message from:', event.origin)
       return
     }
 
     const { type, payload } = event.data || {}
-    
+
     if (!type) return
 
     console.log('[Bridge] Received:', type, payload)
@@ -229,7 +241,7 @@ export const bridge = new Bridge()
  */
 export function setupBridge() {
   bridge.setupListener()
-  
+
   // 暴露到全局供子应用使用
   window.__ARTISAN_BRIDGE__ = {
     navigateTo: bridge.navigateTo.bind(bridge),
@@ -238,7 +250,7 @@ export function setupBridge() {
     on: bridge.on.bind(bridge),
     off: bridge.off.bind(bridge)
   }
-  
+
   console.log('[Bridge] Setup complete, exposed as window.__ARTISAN_BRIDGE__')
 }
 
