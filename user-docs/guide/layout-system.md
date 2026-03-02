@@ -35,7 +35,7 @@
 {
   layoutType: 'tabs',
   layoutOptions: {
-    multiTab: true,
+    
     keepAlive: true
   }
 }
@@ -93,7 +93,7 @@ const routes = [
     showHeader: true,
     showSidebar: true,
     keepAlive: false,
-    multiTab: false
+    
   }
 }
 ```
@@ -105,7 +105,7 @@ import { layoutManager } from '@/core/layoutManager'
 
 // 切换布局
 layoutManager.setLayout('tabs', {
-  multiTab: true
+  
 })
 
 // 更新选项
@@ -121,4 +121,4 @@ layoutManager.updateOptions({
 | showHeader | boolean | true | 是否显示头部 |
 | showSidebar | boolean | true | 是否显示侧边栏 |
 | keepAlive | boolean | false | 是否缓存页面 |
-| multiTab | boolean | false | 是否支持多标签 |
+

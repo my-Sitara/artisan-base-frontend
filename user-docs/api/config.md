@@ -21,7 +21,7 @@
     showHeader?: boolean,        // 是否显示头部
     showSidebar?: boolean,       // 是否显示侧边栏
     keepAlive?: boolean,         // 是否缓存
-    multiTab?: boolean           // 是否支持多标签
+    
   },
   props?: object                 // 传递给子应用的额外属性
 }
@@ -48,7 +48,7 @@ export const microApps = [
       showHeader: true,
       showSidebar: true,
       keepAlive: false,
-      multiTab: false
+      
     },
     props: {
       routerBase: '/vue3'

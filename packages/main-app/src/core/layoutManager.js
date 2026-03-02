@@ -6,7 +6,6 @@ import { ref } from 'vue'
 export const LayoutTypes = {
   DEFAULT: 'default',
   FULL: 'full',
-  TABS: 'tabs',
   EMBEDDED: 'embedded',
   BLANK: 'blank'
 }
@@ -24,8 +23,7 @@ class LayoutManager {
     this.layoutOptions = ref({
       showHeader: true,
       showSidebar: true,
-      keepAlive: false,
-      multiTab: false
+      keepAlive: false
     })
     
     // 布局切换回调
@@ -117,13 +115,7 @@ class LayoutManager {
     this.layoutOptions.value.keepAlive = enabled
   }
 
-  /**
-   * 设置多标签模式
-   * @param {boolean} enabled 
-   */
-  setMultiTab(enabled) {
-    this.layoutOptions.value.multiTab = enabled
-  }
+
 
   /**
    * 监听布局变化
@@ -156,14 +148,34 @@ class LayoutManager {
   }
 
   /**
+   * 强制应用布局配置而不触发回调
+   * @param {string} type - 布局类型
+   * @param {Object} options - 布局选项
+   */
+  applyLayoutWithoutCallback(type, options = {}) {
+    const validTypes = Object.values(LayoutTypes)
+    if (!validTypes.includes(type)) {
+      console.warn(`[LayoutManager] Unknown layout type: ${type}`)
+      type = LayoutTypes.DEFAULT
+    }
+
+    this.currentLayoutType.value = type
+    
+    // 合并选项
+    this.layoutOptions.value = {
+      ...this.layoutOptions.value,
+      ...options
+    }
+  }
+
+  /**
    * 重置为默认布局
    */
   reset() {
     this.setLayout(LayoutTypes.DEFAULT, {
       showHeader: true,
       showSidebar: true,
-      keepAlive: false,
-      multiTab: false
+      keepAlive: false
     })
   }
 }

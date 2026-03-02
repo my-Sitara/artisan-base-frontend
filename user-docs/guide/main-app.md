@@ -75,7 +75,7 @@ import { layoutManager } from '@/core/layoutManager'
 // 设置布局
 layoutManager.setLayout('tabs', {
   showHeader: true,
-  multiTab: true
+  
 })
 ```
 

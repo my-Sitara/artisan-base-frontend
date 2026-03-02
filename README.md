@@ -120,7 +120,7 @@ artisan create sub-app my-iframe-app --type iframe
     showHeader: true,
     showSidebar: true,
     keepAlive: false,
-    multiTab: false
+    
   }
 }
 ```

@@ -83,7 +83,7 @@ export interface MicroAppConfig {
     showHeader?: boolean
     showSidebar?: boolean
     keepAlive?: boolean
-    multiTab?: boolean
+    
   }
 }
 ```

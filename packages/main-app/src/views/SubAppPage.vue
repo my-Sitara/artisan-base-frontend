@@ -48,7 +48,7 @@
       <MicroAppContainer
         v-if="appConfig && (appConfig.type === 'vue3' || appConfig.type === 'vue2')"
         ref="microAppRef"
-        :key="currentAppId"
+        :key="`${currentAppId}-microapp`"
         :app-id="currentAppId"
         :sub-path="subPath"
         @mounted="handleMounted"
@@ -60,7 +60,7 @@
       <IframeContainer
         v-else-if="appConfig && appConfig.type === 'iframe'"
         ref="iframeRef"
-        :key="currentAppId"
+        :key="`${currentAppId}-iframe`"
         :id="currentAppId"
         :src="appConfig.entry + (subPath ? `/#${subPath}` : '')"
         @loaded="handleIframeLoaded"
@@ -102,6 +102,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { getMicroApp } from '@/config/microApps'
 import { microAppManager } from '@/core/microAppManager'
+import { layoutManager } from '@/core/layoutManager'
 import MicroAppContainer from '@/components/MicroAppContainer.vue'
 import IframeContainer from '@/components/IframeContainer.vue'
 import { Refresh } from '@element-plus/icons-vue'
@@ -189,11 +190,24 @@ function goBack() {
 }
 
 // 监听应用ID变化
+// 监听应用ID变化
 watch(currentAppId, (newId) => {
   if (newId) {
     appStore.setActiveApp(newId)
+    
+    // 直接应用微应用的布局配置
+    const appConfig = getMicroApp(newId)
+    if (appConfig && appConfig.layoutType) {
+      try {
+        layoutManager.setLayout(appConfig.layoutType, appConfig.layoutOptions || {})
+      } catch (error) {
+        console.error('[SubAppPage] Error applying layout config:', error)
+      }
+    }
   }
 }, { immediate: true })
+
+// 组件卸载时不需特别清理，布局管理器会管理全局状态
 </script>
 
 <style lang="scss" scoped>
