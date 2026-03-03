@@ -9,10 +9,18 @@
     <div class="embedded-content">
       <slot />
     </div>
+    <div v-if="layoutOptions.showFooter" class="embedded-footer">
+      <Footer />
+    </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { layoutManager } from '@/core/layoutManager'
+import Footer from './Footer.vue'
+
+const layoutOptions = computed(() => layoutManager.layoutOptions.value)
 </script>
 
 <style lang="scss" scoped>
@@ -34,5 +42,9 @@
   flex: 1;
   padding: 15px;
   overflow: auto;
+}
+
+.embedded-footer {
+  margin-top: auto;
 }
 </style>

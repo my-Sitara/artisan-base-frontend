@@ -23,6 +23,7 @@ class LayoutManager {
     this.layoutOptions = ref({
       showHeader: true,
       showSidebar: true,
+      showFooter: false,
       keepAlive: false
     })
     
@@ -108,6 +109,14 @@ class LayoutManager {
   }
 
   /**
+   * 显示/隐藏底部
+   * @param {boolean} show 
+   */
+  setFooterVisible(show) {
+    this.layoutOptions.value.showFooter = show
+  }
+
+  /**
    * 设置 KeepAlive
    * @param {boolean} enabled 
    */
@@ -175,6 +184,7 @@ class LayoutManager {
     this.setLayout(LayoutTypes.DEFAULT, {
       showHeader: true,
       showSidebar: true,
+      showFooter: false,
       keepAlive: false
     })
   }

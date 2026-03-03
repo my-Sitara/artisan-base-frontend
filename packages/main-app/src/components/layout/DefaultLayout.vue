@@ -21,6 +21,10 @@
         <el-main class="layout-main">
           <slot />
         </el-main>
+        
+        <Footer 
+          v-if="layoutOptions.showFooter"
+        />
       </el-container>
     </el-container>
   </div>
@@ -34,6 +38,7 @@ import { useAppStore } from '@/stores/app'
 import { layoutManager } from '@/core/layoutManager'
 import Header from './Header.vue'
 import Sider from './Sider.vue'
+import Footer from './Footer.vue'
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -73,5 +78,6 @@ function toggleSidebar() {
   padding: 20px;
   background-color: #f0f2f5;
   overflow: auto;
+  flex: 1;
 }
 </style>
