@@ -1,14 +1,11 @@
 <template>
-  <div class="app-management-page">
+  <div class="app-loading-page">
     <div class="page-header">
       <h3>子应用加载管理</h3>
       <div class="header-actions">
         <el-button @click="handleRefreshAll">
           <el-icon><Refresh /></el-icon>
           刷新列表
-        </el-button>
-        <el-button type="danger" @click="handleClearErrors">
-          清空错误日志
         </el-button>
       </div>
     </div>
@@ -20,7 +17,7 @@
       </template>
       
       <el-table :data="apps" style="width: 100%;" row-key="id">
-        <el-table-column prop="id" label="应用ID" width="150" />
+        <el-table-column prop="id" label="应用 ID" width="150" />
         <el-table-column prop="name" label="应用名称" width="120" />
         <el-table-column prop="type" label="类型" width="100">
           <template #default="{ row }">
@@ -101,32 +98,10 @@
       </el-table>
     </el-card>
     
-    <!-- 错误日志 -->
-    <el-card class="error-logs-card" style="margin-top: 20px;">
-      <template #header>
-        <div class="card-header">
-          <span>错误日志</span>
-          <el-badge :value="errorLogs.length" type="danger" />
-        </div>
-      </template>
-      
-      <el-table :data="errorLogs" style="width: 100%;" max-height="300">
-        <el-table-column prop="appId" label="应用ID" width="150" />
-        <el-table-column prop="message" label="错误信息" min-width="300" show-overflow-tooltip />
-        <el-table-column label="时间" width="180">
-          <template #default="{ row }">
-            {{ formatTime(row.time) }}
-          </template>
-        </el-table-column>
-      </el-table>
-      
-      <el-empty v-if="errorLogs.length === 0" description="暂无错误日志" />
-    </el-card>
-    
     <!-- 应用详情对话框 -->
     <el-dialog v-model="showDetailDialog" title="应用详情" width="600px">
       <el-descriptions v-if="currentApp" :column="2" border>
-        <el-descriptions-item label="应用ID">{{ currentApp.id }}</el-descriptions-item>
+        <el-descriptions-item label="应用 ID">{{ currentApp.id }}</el-descriptions-item>
         <el-descriptions-item label="应用名称">{{ currentApp.name }}</el-descriptions-item>
         <el-descriptions-item label="类型">{{ currentApp.type }}</el-descriptions-item>
         <el-descriptions-item label="状态">
@@ -157,7 +132,7 @@
         label-position="right"
       >
         <el-divider content-position="left">基本信息</el-divider>
-        <el-form-item label="应用ID">
+        <el-form-item label="应用 ID">
           <el-input :model-value="editForm.id" disabled />
         </el-form-item>
         <el-form-item label="应用名称">
@@ -194,7 +169,6 @@
               placeholder="请选择布局类型">
               <el-option label="默认布局" value="default" />
               <el-option label="全屏布局" value="full" />
-              
               <el-option label="嵌入式布局" value="embedded" />
               <el-option label="空白布局" value="blank" />
             </el-select>
@@ -255,8 +229,6 @@
               <span :class="{'disabled-label': isOptionDisabled('keepAlive')}">KeepAlive</span>
               <el-tag v-if="isOptionDisabled('keepAlive')" size="small" type="info" effect="plain">固定</el-tag>
             </div>
-            
-
           </div>
           
           <!-- 布局配置提示信息 -->
@@ -268,8 +240,6 @@
               :closable="false"
             />
           </div>
-          
-
         </el-form-item>
 
         <el-divider content-position="left">Props 配置</el-divider>
@@ -288,7 +258,7 @@
       <div class="layout-preview-container">
         <div class="layout-preview-info">
           <el-alert
-            :title="`当前预览: ${getLayoutDescription(previewLayoutType)}`"
+            :title="`当前预览：${getLayoutDescription(previewLayoutType)}`"
             type="info"
             show-icon
             :closable="false"
@@ -383,6 +353,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAppStore } from '@/stores/app'
 import { microAppManager } from '@/core/microAppManager'
@@ -390,6 +361,7 @@ import { layoutManager } from '@/core/layoutManager'
 import { Refresh, View } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
+const router = useRouter()
 const appStore = useAppStore()
 
 const { apps } = storeToRefs(appStore)
@@ -408,10 +380,6 @@ const layoutOptions = ref({
 })
 const showLayoutPreviewDialog = ref(false)
 const previewLayoutType = ref('default')
-
-
-
-
 
 // 监听布局选项变化
 watch(layoutOptions, (newVal) => {
@@ -459,10 +427,6 @@ async function handleForceRefresh(appId) {
 
 function handleRefreshAll() {
   appStore.refreshApps()
-}
-
-function handleClearErrors() {
-  microAppManager.clearErrorLogs()
 }
 
 function showAppDetail(app) {
@@ -521,8 +485,8 @@ function handleLayoutTypeChange() {
     case 'embedded':
       // 嵌入式布局：默认显示头部和侧边栏（至少显示一个）
       layoutOptions.value = {
-        showHeader: layoutOptions.value.showHeader ?? true,  // 保持现有选择，如果没有则默认为 true
-        showSidebar: layoutOptions.value.showSidebar ?? true,  // 保持现有选择，如果没有则默认为 true
+        showHeader: layoutOptions.value.showHeader ?? true,
+        showSidebar: layoutOptions.value.showSidebar ?? true,
         showFooter: false,
         keepAlive: false
       }
@@ -546,46 +510,29 @@ function handleLayoutTypeChange() {
 function applyLayoutConstraints() {
   if (!editForm.value?.layoutType) return;
   
-  // 根据布局配置定义应用约束
   const constraints = {
-    'default': { showHeader: true, showSidebar: true },
-    'full': { showHeader: false, showSidebar: false },
-    'embedded': {},
-    'blank': { showHeader: false, showSidebar: false }
+    'full': {
+      showHeader: false,
+      showSidebar: false,
+      showFooter: false
+    },
+    'blank': {
+      showHeader: false,
+      showSidebar: false,
+      showFooter: false
+    }
   };
   
-  const currentConstraints = constraints[editForm.value.layoutType];
-  if (currentConstraints) {
-    Object.entries(currentConstraints).forEach(([key, value]) => {
-      layoutOptions.value[key] = value;
-      // 同时更新表单中的值
-      if (editForm.value.layoutOptions) {
-        editForm.value.layoutOptions[key] = value;
-      }
-    });
-  }
-  
-  // 特殊处理嵌入式布局：确保至少显示头部或侧边栏之一
-  if (editForm.value.layoutType === 'embedded') {
-    // 如果用户尝试同时隐藏头部和侧边栏，则保持至少一个可见
-    if (!layoutOptions.value.showHeader && !layoutOptions.value.showSidebar) {
-      // 检查是否用户刚刚修改了这两个值，如果是，优先保留之前的设置
-      if (layoutOptions.value.showHeader === false && layoutOptions.value.showSidebar === false) {
-        // 如果用户尝试同时取消头部和侧边栏，则恢复到至少显示一个的状态
-        // 尝试恢复到之前的状态，如果无法确定则默认显示侧边栏
-        if (editForm.value.layoutOptions && editForm.value.layoutOptions.showSidebar !== false) {
-          layoutOptions.value.showSidebar = true;
-          editForm.value.layoutOptions.showSidebar = true;
-        } else {
-          layoutOptions.value.showHeader = true;
-          editForm.value.layoutOptions.showHeader = true;
-        }
-      }
-    }
+  const constraint = constraints[editForm.value.layoutType];
+  if (constraint) {
+    layoutOptions.value = {
+      ...layoutOptions.value,
+      ...constraint
+    };
   }
 }
 
-// 判断布局选项是否应该被禁用
+// 判断某个选项是否应该被禁用
 function isOptionDisabled(option) {
   if (!editForm.value?.layoutType) return false
   
@@ -629,7 +576,6 @@ function getOptionTitle(option) {
       'embedded': '嵌入式布局不建议使用 KeepAlive',
       'default': ''
     },
-
   }
   
   return titles[option]?.[editForm.value.layoutType] || ''
@@ -663,9 +609,6 @@ function showLayoutPreview() {
   showLayoutPreviewDialog.value = true;
 }
 
-// 重置布局选项为当前布局类型的默认配置
-
-
 // 获取布局描述
 function getLayoutDescription(layoutType) {
   const descriptions = {
@@ -687,8 +630,6 @@ function getLayoutAlertType(layoutType) {
   };
   return alertTypes[layoutType] || 'info';
 }
-
-
 
 function handleSaveEdit() {
   if (!editForm.value) return
@@ -727,7 +668,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.app-management-page {
+.app-loading-page {
   padding: 0;
 }
 
@@ -743,20 +684,11 @@ onMounted(() => {
   }
 }
 
-.apps-table-card,
-.error-logs-card {
+.apps-table-card {
   .card-header {
     display: flex;
     align-items: center;
     gap: 10px;
-  }
-}
-
-:deep(.el-descriptions) {
-  pre {
-    margin: 0;
-    font-size: 12px;
-    white-space: pre-wrap;
   }
 }
 
@@ -794,33 +726,6 @@ onMounted(() => {
 
 .layout-hint-info {
   margin-top: 10px;
-}
-
-.layout-options-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  padding: 10px 0;
-}
-
-.layout-option-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
-  background-color: #fafafa;
-  transition: all 0.3s;
-}
-
-.layout-option-item:hover {
-  background-color: #f2f6fc;
-  border-color: #dcdfe6;
-}
-
-.disabled-label {
-  color: #bbb;
 }
 
 /* 布局预览样式 */
@@ -904,24 +809,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.preview-header {
-  height: 60px;
-  background: #fff;
-  border-bottom: 1px solid #dcdfe6;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-}
-
-.preview-breadcrumb {
-  color: #606266;
-}
-
-.preview-user {
-  color: #606266;
 }
 
 .preview-content {
@@ -1040,114 +927,3 @@ onMounted(() => {
   background: #fff;
 }
 </style>
-
-/* 布局预览样式 */
-.layout-preview-container {
-  padding: 20px;
-  min-height: 400px;
-}
-
-.layout-preview {
-  width: 100%;
-  border: 1px solid #e4e7ed;
-  border-radius: 4px;
-  overflow: hidden;
-  background: #f5f7fa;
-}
-
-/* 默认布局预览 */
-.default-layout {
-  height: 400px;
-}
-
-.default-layout .preview-sidebar {
-  width: 200px;
-  background: #304156;
-  display: flex;
-  flex-direction: column;
-}
-
-.default-layout .preview-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* 全屏布局预览 */
-.full-layout {
-  height: 300px;
-}
-
-.preview-full-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: #fff;
-}
-
-/* 标签页布局预览 */
-.tabs-layout {
-  height: 450px;
-}
-
-.preview-tabs {
-  height: 40px;
-  background: #fff;
-  border-bottom: 1px solid #dcdfe6;
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  gap: 5px;
-}
-
-.preview-tab {
-  padding: 5px 15px;
-  border: 1px solid #dcdfe6;
-  border-bottom: none;
-  border-radius: 4px 4px 0 0;
-  background: #f5f7fa;
-  cursor: pointer;
-}
-
-.preview-tab.active {
-  background: #fff;
-  border-bottom: 1px solid #fff;
-  margin-bottom: -1px;
-  color: #409eff;
-}
-
-/* 嵌入式布局预览 */
-.embedded-layout {
-  height: 400px;
-}
-
-.embedded-layout .preview-sidebar {
-  width: 200px;
-  background: #304156;
-  display: flex;
-  flex-direction: column;
-}
-
-.embedded-layout .preview-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* 空白布局预览 */
-.blank-layout {
-  height: 200px;
-}
-
-.preview-blank-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: #fff;
-}

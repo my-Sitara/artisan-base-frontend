@@ -33,11 +33,31 @@ const routes = [
   {
     path: '/app-management',
     name: 'AppManagement',
-    component: () => import('@/views/AppManagement.vue'),
+    redirect: '/app-management/loading',
     meta: {
       title: '应用管理',
       layout: 'default'
-    }
+    },
+    children: [
+      {
+        path: 'loading',
+        name: 'AppLoading',
+        component: () => import('@/views/AppLoading.vue'),
+        meta: {
+          title: '子应用加载管理',
+          layout: 'default'
+        }
+      },
+      {
+        path: 'error-logs',
+        name: 'ErrorLogs',
+        component: () => import('@/views/ErrorLogs.vue'),
+        meta: {
+          title: '错误日志',
+          layout: 'default'
+        }
+      }
+    ]
   },
   // Vue3 子应用路由
   {

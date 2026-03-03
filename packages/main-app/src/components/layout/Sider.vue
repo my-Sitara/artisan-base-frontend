@@ -51,10 +51,20 @@
         <template #title>多应用同屏</template>
       </el-menu-item>
       
-      <el-menu-item index="/app-management">
-        <el-icon><Setting /></el-icon>
-        <template #title>应用管理</template>
-      </el-menu-item>
+      <el-sub-menu index="app-management">
+        <template #title>
+          <el-icon><Setting /></el-icon>
+          <span>应用管理</span>
+        </template>
+        <el-menu-item index="/app-management/loading">
+          <el-icon><Monitor /></el-icon>
+          <template #title>子应用加载管理</template>
+        </el-menu-item>
+        <el-menu-item index="/app-management/error-logs">
+          <el-icon><Document /></el-icon>
+          <template #title>错误日志</template>
+        </el-menu-item>
+      </el-sub-menu>
     </el-menu>
   </el-aside>
 </template>
