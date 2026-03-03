@@ -78,7 +78,7 @@ export interface MicroAppConfig {
   lastModified: number
   preload: boolean
   type: 'vue3' | 'vue2' | 'iframe' | 'link'
-  layoutType: 'default' | 'full' | 'tabs' | 'embedded' | 'blank'
+  layoutType: 'default' | 'full' | 'embedded' | 'blank'
   layoutOptions: {
     showHeader?: boolean
     showSidebar?: boolean

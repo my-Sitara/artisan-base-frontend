@@ -73,7 +73,7 @@ bridge.navigateTo({ appId: 'vue3-sub-app', path: '/list' })
 import { layoutManager } from '@/core/layoutManager'
 
 // 设置布局
-layoutManager.setLayout('tabs', {
+layoutManager.setLayout('default', {
   showHeader: true,
   
 })

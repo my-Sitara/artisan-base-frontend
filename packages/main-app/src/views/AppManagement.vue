@@ -268,7 +268,6 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="resetLayoutOptions">恢复默认</el-button>
         <el-button @click="showEditDialog = false">取消</el-button>
         <el-button type="primary" @click="handleSaveEdit">保存</el-button>
       </template>
@@ -621,46 +620,6 @@ function showLayoutPreview() {
 }
 
 // 重置布局选项为当前布局类型的默认配置
-function resetLayoutOptions() {
-  if (!editForm.value?.layoutType) return;
-  
-  // 根据当前布局类型重置选项
-  switch (editForm.value.layoutType) {
-    case 'default':
-      layoutOptions.value = {
-        showHeader: true,
-        showSidebar: true,
-        keepAlive: false
-      };
-      break;
-    case 'full':
-      layoutOptions.value = {
-        showHeader: false,
-        showSidebar: false,
-        keepAlive: false
-      };
-      break;
-
-    case 'embedded':
-      layoutOptions.value = {
-        showHeader: true,  // 嵌入式布局默认显示头部
-        showSidebar: true,  // 嵌入式布局默认显示侧边栏
-        keepAlive: false
-      };
-      break;
-    case 'blank':
-      layoutOptions.value = {
-        showHeader: false,
-        showSidebar: false,
-        keepAlive: false
-      };
-      break;
-  }
-  
-  // 强制应用布局类型约束
-  applyLayoutConstraints();
-}
-
 
 
 // 获取布局描述

@@ -10,7 +10,7 @@
  * - entry: 应用入口地址
  * - activeRule: 激活规则
  * - type: 应用类型 (vue3/vue2/iframe/link)
- * - layoutType: 布局类型 (default/tabs/full/embedded/blank)
+ * - layoutType: 布局类型 (default/full/embedded/blank)
  * - layoutOptions: 布局选项，会根据 layoutType 自动标准化
  * 
  * 注意事项：

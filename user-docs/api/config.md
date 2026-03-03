@@ -16,7 +16,7 @@
   lastModified: number,          // 最后修改时间戳
   preload: boolean,              // 是否预加载
   type: 'vue3' | 'vue2' | 'iframe' | 'link',  // 类型
-  layoutType: 'default' | 'full' | 'tabs' | 'embedded' | 'blank',
+  layoutType: 'default' | 'full' | 'embedded' | 'blank',
   layoutOptions: {
     showHeader?: boolean,        // 是否显示头部
     showSidebar?: boolean,       // 是否显示侧边栏

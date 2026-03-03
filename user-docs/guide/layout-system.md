@@ -33,7 +33,7 @@
 
 ```javascript
 {
-  layoutType: 'tabs',
+  layoutType: 'default',
   layoutOptions: {
     
     keepAlive: true
@@ -104,7 +104,7 @@ const routes = [
 import { layoutManager } from '@/core/layoutManager'
 
 // 切换布局
-layoutManager.setLayout('tabs', {
+layoutManager.setLayout('default', {
   
 })
 
