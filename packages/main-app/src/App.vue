@@ -100,9 +100,19 @@ watch(
 // Watch for layout changes when route changes
 watch(
   () => [route.path, route.params.appId, route.meta?.appId],
-  ([newPath, newAppId, newMetaAppId]) => {
+  ([newPath, newAppId, newMetaAppId], [oldPath, oldAppId, oldMetaAppId] = []) => {
     try {
-      // 当路由变化时，重新检查微应用配置并应用布局
+      // 检查是否从子应用切换到主应用页面
+      const wasInSubApp = oldAppId || oldMetaAppId
+      const isInSubApp = newAppId || newMetaAppId
+      
+      // 如果从子应用返回主应用页面，重置布局为默认配置
+      if (wasInSubApp && !isInSubApp) {
+        layoutManager.reset()
+        return
+      }
+      
+      // 当进入子应用时，应用微应用的布局配置
       const appId = newMetaAppId || newAppId
       if (appId) {
         const appConfig = getMicroApp(appId)
