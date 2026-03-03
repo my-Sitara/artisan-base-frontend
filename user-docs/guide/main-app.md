@@ -61,11 +61,10 @@ bridge.navigateTo({ appId: 'vue3-sub-app', path: '/list' })
 
 ### layoutManager.js
 
-布局管理器，支持 5 种布局类型：
+布局管理器，支持 4 种布局类型:
 
-- `default` - 默认布局（含头部和侧边栏）
+- `default` - 默认布局 (含头部和侧边栏)
 - `full` - 全屏布局
-- `tabs` - 多标签页布局
 - `embedded` - 嵌入式布局
 - `blank` - 空白布局
 
@@ -96,9 +95,9 @@ layoutManager.setLayout('default', {
 
 ### 多应用同屏展示页 (MultiInstancePage.vue)
 
--同一页面加载多个不同子应用
--支持多个应用实例管理
-- 支持 grid/tabs/split布局
+- 同一页面加载多个不同子应用
+- 支持多个应用实例管理
+- 支持 grid/split布局
 
 ### 应用管理页 (AppManagement.vue)
 
@@ -131,7 +130,6 @@ export const useUserStore = defineStore('user', () => {
 })
 ```
 
-持久化的数据：
+持久化的数据:
 - `token` - 用户令牌
 - `activeAppId` - 当前激活的应用
-- `tabs` - 标签页列表

@@ -93,40 +93,6 @@ class LayoutManager {
   }
 
   /**
-   * 显示/隐藏头部
-   * @param {boolean} show 
-   */
-  setHeaderVisible(show) {
-    this.layoutOptions.value.showHeader = show
-  }
-
-  /**
-   * 显示/隐藏侧边栏
-   * @param {boolean} show 
-   */
-  setSidebarVisible(show) {
-    this.layoutOptions.value.showSidebar = show
-  }
-
-  /**
-   * 显示/隐藏底部
-   * @param {boolean} show 
-   */
-  setFooterVisible(show) {
-    this.layoutOptions.value.showFooter = show
-  }
-
-  /**
-   * 设置 KeepAlive
-   * @param {boolean} enabled 
-   */
-  setKeepAlive(enabled) {
-    this.layoutOptions.value.keepAlive = enabled
-  }
-
-
-
-  /**
    * 监听布局变化
    * @param {Function} callback 
    */
@@ -154,27 +120,6 @@ class LayoutManager {
 
     const { layoutType, layoutOptions } = microAppConfig
     this.setLayout(layoutType || LayoutTypes.DEFAULT, layoutOptions || {})
-  }
-
-  /**
-   * 强制应用布局配置而不触发回调
-   * @param {string} type - 布局类型
-   * @param {Object} options - 布局选项
-   */
-  applyLayoutWithoutCallback(type, options = {}) {
-    const validTypes = Object.values(LayoutTypes)
-    if (!validTypes.includes(type)) {
-      console.warn(`[LayoutManager] Unknown layout type: ${type}`)
-      type = LayoutTypes.DEFAULT
-    }
-
-    this.currentLayoutType.value = type
-    
-    // 合并选项
-    this.layoutOptions.value = {
-      ...this.layoutOptions.value,
-      ...options
-    }
   }
 
   /**

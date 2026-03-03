@@ -1,8 +1,8 @@
 # Artisan Base Frontend
 
-企业级微前端基础平台脚手架，基于 Monorepo架，构，支持 Vue3主应用和多种类型子应用。
+企业级微前端基础平台脚手架，基于 Monorepo 架构，支持 Vue3 主应用和多种类型子应用。
 
-##环境要求
+## 环境要求
 
 - Node.js >= 18.12.0
 - npm >= 9.0.0
@@ -12,7 +12,7 @@
 - **Monorepo 架构**: 使用 Lerna + npm workspace 管理
 - **微前端支持**: 基于 qiankun (loadMicroApp 模式)
 - **多类型子应用**: 支持 vue3 / vue2 / iframe / link
-- **布局编排系统**: 支持 5 种布局类型
+- **布局编排系统**: 支持 4 种布局类型 (default/full/embedded/blank)
 - **跨应用通信**: 完整的 bridge 通信机制
 - **状态管理**: Pinia 3.x + 持久化
 - **iframe 跨域治理**: 完整的安全策略
@@ -110,28 +110,26 @@ artisan create sub-app my-iframe-app --type iframe
   entry: '//localhost:7080',    // 入口地址
   activeRule: '/vue3',          // 激活规则
   container: '#micro-app',      // 容器选择器
-  status: 'online',             // 状态: online | offline
+  status: 'online',             // 状态：online | offline
   version: '1.0.0',             // 版本号
   lastModified: Date.now(),     // 最后修改时间
   preload: true,                // 是否预加载
-  type: 'vue3',                 // 类型: vue3 | vue2 | iframe | link
+  type: 'vue3',                 // 类型：vue3 | vue2 | iframe | link
   layoutType: 'default',        // 布局类型
   layoutOptions: {
     showHeader: true,
     showSidebar: true,
-    keepAlive: false,
-    
+    keepAlive: false
   }
 }
 ```
 
 ## 布局类型
 
-- **default**: 默认布局（含头部和侧边栏）
-- **full**: 全屏布局
-- **tabs**: 多标签页布局
-- **embedded**: 嵌入式布局
-- **blank**: 空白布局
+- **default**: 默认布局 (含头部和侧边栏)
+- **full**: 全屏布局 (无头部和侧边栏)
+- **embedded**: 嵌入式布局 (至少显示头部或侧边栏之一)
+- **blank**: 空白布局 (无任何导航元素)
 
 ## 跨应用跳转
 

@@ -1,26 +1,65 @@
 <template>
   <div class="embedded-layout">
-    <div class="embedded-header">
-      <el-breadcrumb separator="/">
-        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-        <el-breadcrumb-item>嵌入式布局</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div>
-    <div class="embedded-content">
-      <slot />
-    </div>
-    <div v-if="layoutOptions.showFooter" class="embedded-footer">
-      <Footer />
+    <div class="embedded-container">
+      <!-- Sider -->
+      <Sider 
+        v-if="layoutOptions.showSidebar"
+        :collapsed="collapsed"
+        :active-menu="activeMenu"
+        @toggle-collapse="toggleSidebar"
+      />
+      
+      <!-- 主区域 -->
+      <div class="embedded-main">
+        <!-- Header -->
+        <Header 
+          v-if="layoutOptions.showHeader"
+          :collapsed="collapsed"
+          :active-app="activeApp"
+          :show-sidebar="layoutOptions.showSidebar"
+          @toggle-sidebar="toggleSidebar"
+        />
+        
+        <!-- Content -->
+        <div class="embedded-content">
+          <slot />
+        </div>
+        
+        <!-- Footer -->
+        <Footer 
+          v-if="layoutOptions.showFooter"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useAppStore } from '@/stores/app'
 import { layoutManager } from '@/core/layoutManager'
+import Sider from './Sider.vue'
+import Header from './Header.vue'
 import Footer from './Footer.vue'
 
+const route = useRoute()
+const appStore = useAppStore()
+
+const { sidebarCollapsed: collapsed, activeApp } = storeToRefs(appStore)
 const layoutOptions = computed(() => layoutManager.layoutOptions.value)
+
+const activeMenu = computed(() => {
+  if (route.params.appId) {
+    return `/app/${route.params.appId}`
+  }
+  return route.path
+})
+
+function toggleSidebar() {
+  appStore.toggleSidebar()
+}
 </script>
 
 <style lang="scss" scoped>
@@ -32,15 +71,22 @@ const layoutOptions = computed(() => layoutManager.layoutOptions.value)
   background-color: #f0f2f5;
 }
 
-.embedded-header {
-  padding: 15px 20px;
-  background-color: #fff;
-  border-bottom: 1px solid #e6e6e6;
+.embedded-container {
+  display: flex;
+  height: 100%;
+}
+
+.embedded-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .embedded-content {
   flex: 1;
-  padding: 15px;
+  padding: 20px;
+  background-color: #f0f2f5;
   overflow: auto;
 }
 

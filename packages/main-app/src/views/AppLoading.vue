@@ -266,83 +266,11 @@
           />
         </div>
         
-        <div v-if="previewLayoutType === 'default'" class="layout-preview default-layout">
-          <div class="preview-container">
-            <!-- Sider 可选显示 -->
-            <div class="preview-sidebar" v-if="layoutOptions.showSidebar">
-              <div class="preview-logo">Artisan 微前端</div>
-              <div class="preview-menu-item active">应用管理</div>
-              <div class="preview-menu-item">系统设置</div>
-            </div>
-            
-            <!-- 主区域 -->
-            <div class="preview-main">
-              <!-- Header 可选显示 -->
-              <div class="preview-header" v-if="layoutOptions.showHeader">
-                <div class="preview-breadcrumb">首页 / 应用</div>
-                <div class="preview-user">用户</div>
-              </div>
-              
-              <!-- 内容区域 -->
-              <div class="preview-content">
-                <div class="preview-content-area">
-                  <div class="preview-content-block">内容区域</div>
-                  <div class="preview-content-block">主要内容</div>
-                </div>
-              </div>
-              
-              <!-- Footer 可选显示 -->
-              <div class="preview-footer" v-if="layoutOptions.showFooter">
-                <div class="preview-footer-content">© 2026 Artisan Base Frontend. All rights reserved.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div v-else-if="previewLayoutType === 'full'" class="layout-preview full-layout">
-          <div class="preview-full-content">
-            <div class="preview-content-block">全屏内容区域</div>
-            <div class="preview-content-block">无头部侧边栏</div>
-          </div>
-        </div>
-        
-        <div v-else-if="previewLayoutType === 'embedded'" class="layout-preview embedded-layout">
-          <div class="preview-container">
-            <!-- Sider 可选显示 -->
-            <div class="preview-sidebar" v-if="layoutOptions.showSidebar">
-              <div class="preview-menu-item active">应用管理</div>
-              <div class="preview-menu-item">系统设置</div>
-            </div>
-            
-            <!-- 主区域 -->
-            <div class="preview-main">
-              <!-- Header 可选显示 -->
-              <div class="preview-header" v-if="layoutOptions.showHeader">
-                <div class="preview-breadcrumb">首页 / 嵌入式布局</div>
-              </div>
-              
-              <!-- 内容区域 -->
-              <div class="preview-content">
-                <div class="preview-content-area">
-                  <div class="preview-content-block">嵌入式内容区域</div>
-                  <div class="preview-content-block">至少显示头部或侧边栏之一</div>
-                </div>
-              </div>
-              
-              <!-- Footer 可选显示 -->
-              <div class="preview-footer" v-if="layoutOptions.showFooter">
-                <div class="preview-footer-content">© 2026 Artisan Base Frontend. All rights reserved.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div v-else-if="previewLayoutType === 'blank'" class="layout-preview blank-layout">
-          <div class="preview-blank-content">
-            <div class="preview-content-block">空白内容区域</div>
-            <div class="preview-content-block">无任何装饰</div>
-          </div>
-        </div>
+        <!-- 使用独立的布局预览组件 -->
+        <component 
+          :is="currentPreviewComponent" 
+          :layout-options="layoutOptions"
+        />
       </div>
       <template #footer>
         <el-button @click="showLayoutPreviewDialog = false">关闭</el-button>
@@ -352,16 +280,22 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAppStore } from '@/stores/app'
 import { microAppManager } from '@/core/microAppManager'
 import { layoutManager } from '@/core/layoutManager'
 import { Refresh, View } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import {
+  LayoutPreviewComponents,
+  getLayoutDescription,
+  getLayoutAlertType
+} from '@/components/layout/LayoutPreview.js'
 
 const router = useRouter()
+const route = useRoute()
 const appStore = useAppStore()
 
 const { apps } = storeToRefs(appStore)
@@ -380,6 +314,11 @@ const layoutOptions = ref({
 })
 const showLayoutPreviewDialog = ref(false)
 const previewLayoutType = ref('default')
+
+// 当前使用的预览组件
+const currentPreviewComponent = computed(() => {
+  return LayoutPreviewComponents[previewLayoutType.value] || LayoutPreviewComponents.default
+})
 
 // 监听布局选项变化
 watch(layoutOptions, (newVal) => {
@@ -609,28 +548,6 @@ function showLayoutPreview() {
   showLayoutPreviewDialog.value = true;
 }
 
-// 获取布局描述
-function getLayoutDescription(layoutType) {
-  const descriptions = {
-    'default': '标准布局，包含头部导航栏和侧边栏，适用于大多数应用场景。',
-    'full': '全屏布局，不显示头部和侧边栏，适用于大屏展示、数据看板等需要最大化内容区域的场景。',
-    'embedded': '嵌入式布局，默认显示头部和侧边栏，至少显示头部或侧边栏之一，适用于嵌入第三方应用或轻量化展示。',
-    'blank': '空白布局，不显示任何导航元素，适用于登录页、欢迎页等极简化场景。'
-  };
-  return descriptions[layoutType] || '请选择布局类型';
-}
-
-// 获取布局提醒类型
-function getLayoutAlertType(layoutType) {
-  const alertTypes = {
-    'default': 'info',
-    'full': 'warning',
-    'embedded': 'info',
-    'blank': 'info'
-  };
-  return alertTypes[layoutType] || 'info';
-}
-
 function handleSaveEdit() {
   if (!editForm.value) return
   
@@ -651,11 +568,11 @@ function handleSaveEdit() {
   // 更新微应用配置
   appStore.updateApp(editForm.value.id, config)
   
-  // 更新微应用配置中的布局设置
-  appStore.updateApp(editForm.value.id, {
-    layoutType: editForm.value.layoutType,
-    layoutOptions: { ...editForm.value.layoutOptions }
-  })
+  // 如果当前正在查看这个应用，立即应用新的布局配置
+  const currentRouteAppId = route.params.appId || route.meta?.appId
+  if (currentRouteAppId === editForm.value.id) {
+    layoutManager.setLayoutFromMicroApp(config)
+  }
   
   showEditDialog.value = false
   ElMessage.success('配置已保存')
@@ -734,196 +651,16 @@ onMounted(() => {
   min-height: 400px;
 }
 
+.layout-preview-info {
+  margin-bottom: 15px;
+}
+
+/* 布局预览通用样式 */
 .layout-preview {
   width: 100%;
   border: 1px solid #e4e7ed;
   border-radius: 4px;
   overflow: hidden;
   background: #f5f7fa;
-}
-
-/* 默认布局预览 */
-.default-layout {
-  height: 400px;
-}
-
-.default-layout .preview-sidebar {
-  width: 200px;
-  background: #304156;
-  display: flex;
-  flex-direction: column;
-}
-
-.default-layout .preview-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.preview-header {
-  height: 60px;
-  background: #fff;
-  border-bottom: 1px solid #dcdfe6;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-}
-
-.preview-logo {
-  font-weight: bold;
-  color: #409eff;
-}
-
-.preview-container {
-  display: flex;
-  height: 100%;
-}
-
-.preview-sidebar {
-  width: 200px;
-  background: #304156;
-  display: flex;
-  flex-direction: column;
-}
-
-.preview-menu-item {
-  color: #bfcbd9;
-  padding: 15px 20px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.preview-menu-item:hover {
-  background: #263445;
-}
-
-.preview-menu-item.active {
-  color: #409eff;
-  background: #263445;
-}
-
-.preview-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.preview-content {
-  flex: 1;
-  padding: 20px;
-  background: #f0f2f5;
-  overflow: auto;
-}
-
-.preview-content-area {
-  background: #fff;
-  border-radius: 4px;
-  padding: 20px;
-  min-height: 100%;
-}
-
-.preview-content-block {
-  padding: 10px;
-  margin-bottom: 10px;
-  background: #ecf5ff;
-  border: 1px solid #d9ecff;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.preview-footer {
-  height: 50px;
-  background: #fff;
-  border-top: 1px solid #dcdfe6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 20px;
-}
-
-.preview-footer-content {
-  color: #909399;
-  font-size: 13px;
-}
-
-/* 全屏布局预览 */
-.full-layout {
-  height: 300px;
-}
-
-.preview-full-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: #fff;
-}
-
-/* 标签页布局预览 */
-.tabs-layout {
-  height: 450px;
-}
-
-.preview-tabs {
-  height: 40px;
-  background: #fff;
-  border-bottom: 1px solid #dcdfe6;
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  gap: 5px;
-}
-
-.preview-tab {
-  padding: 5px 15px;
-  border: 1px solid #dcdfe6;
-  border-bottom: none;
-  border-radius: 4px 4px 0 0;
-  background: #f5f7fa;
-  cursor: pointer;
-}
-
-.preview-tab.active {
-  background: #fff;
-  border-bottom: 1px solid #fff;
-  margin-bottom: -1px;
-  color: #409eff;
-}
-
-/* 嵌入式布局预览 */
-.embedded-layout {
-  height: 400px;
-}
-
-.embedded-layout .preview-sidebar {
-  width: 200px;
-  background: #304156;
-  display: flex;
-  flex-direction: column;
-}
-
-.embedded-layout .preview-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* 空白布局预览 */
-.blank-layout {
-  height: 200px;
-}
-
-.preview-blank-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: #fff;
 }
 </style>

@@ -37,7 +37,7 @@ SubAppPage.vue 会在加载时应用对应微应用的布局配置：
 
 ## 配置选项
 
-- **layoutType**: 布局类型 (default, tabs, full, embedded, blank)
+- **layoutType**: 布局类型 (default, full, embedded, blank)
 - **layoutOptions**: 布局选项
   - showHeader: 是否显示头部
   - showSidebar: 是否显示侧边栏

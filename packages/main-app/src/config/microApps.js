@@ -18,7 +18,13 @@
  * - 不同的 layoutType 对应不同的推荐 layoutOptions
  * - 使用 getValidatedMicroApp 可获取经过验证的配置
  */
-import { normalizeLayoutConfig, validateLayoutConfig, getDefaultLayoutOptions } from './layoutConfig'
+import { normalizeLayoutConfig, getDefaultLayoutOptions } from './layoutConfig'
+
+// 通用的布局选项工厂函数
+const createLayoutOptions = (type, overrides = {}) => {
+  const defaults = getDefaultLayoutOptions(type)
+  return { ...defaults, ...overrides }
+}
 
 // 定义基础微应用配置（不含标准化的布局选项）
 const baseMicroApps = [
@@ -34,11 +40,11 @@ const baseMicroApps = [
     preload: true,
     type: 'vue3',
     layoutType: 'default',
-    layoutOptions: {
+    layoutOptions: createLayoutOptions('default', {
       showHeader: true,
       showSidebar: true,
       keepAlive: false
-    },
+    }),
     props: {
       routerBase: '/vue3'
     }
@@ -55,11 +61,11 @@ const baseMicroApps = [
     preload: true,
     type: 'vue2',
     layoutType: 'default',
-    layoutOptions: {
+    layoutOptions: createLayoutOptions('default', {
       showHeader: true,
       showSidebar: true,
       keepAlive: false
-    },
+    }),
     props: {
       routerBase: '/vue2'
     }
@@ -76,10 +82,10 @@ const baseMicroApps = [
     preload: false,
     type: 'iframe',
     layoutType: 'embedded',
-    layoutOptions: {
+    layoutOptions: createLayoutOptions('embedded', {
       showSidebar: false,
       keepAlive: false
-    }
+    })
   }
 ]
 
@@ -95,29 +101,11 @@ export const microApps = baseMicroApps.map(app => {
 
 /**
  * 获取微应用配置
- * @param {string} appId - 应用ID
+ * @param {string} appId - 应用 ID
  * @returns {Object|undefined}
  */
 export function getMicroApp(appId) {
   return microApps.find(app => app.id === appId)
-}
-
-/**
- * 获取微应用配置并验证布局
- * @param {string} appId - 应用ID
- * @returns {Object|undefined}
- */
-export function getValidatedMicroApp(appId) {
-  const app = microApps.find(app => app.id === appId)
-  if (!app) return undefined
-  
-  // 验证布局配置
-  const validation = validateLayoutConfig(app.layoutType, app.layoutOptions)
-  if (validation.warnings.length > 0) {
-    console.warn(`[MicroApp Config] App ${appId} layout warnings:`, validation.warnings)
-  }
-  
-  return app
 }
 
 /**
@@ -139,63 +127,13 @@ export function getMicroAppsByType(type) {
 
 /**
  * 更新微应用配置
- * @param {string} appId - 应用ID
+ * @param {string} appId - 应用 ID
  * @param {Object} config - 配置对象
  */
 export function updateMicroAppConfig(appId, config) {
   const index = microApps.findIndex(app => app.id === appId)
   if (index !== -1) {
     microApps[index] = { ...microApps[index], ...config }
-  }
-}
-
-/**
- * 验证所有微应用的布局配置
- * @returns {Array} 验证结果数组
- */
-export function validateAllMicroAppLayouts() {
-  const results = []
-  
-  microApps.forEach(app => {
-    const validation = validateLayoutConfig(app.layoutType, app.layoutOptions)
-    results.push({
-      appId: app.id,
-      appName: app.name,
-      layoutType: app.layoutType,
-      validation
-    })
-  })
-  
-  return results
-}
-
-/**
- * 获取布局配置建议
- * @param {string} appId - 应用ID
- * @returns {Object|null} 建议的配置
- */
-export function getLayoutSuggestions(appId) {
-  const app = microApps.find(app => app.id === appId)
-  if (!app) return null
-  
-  const defaultOptions = getDefaultLayoutOptions(app.layoutType)
-  const suggestions = []
-  
-  Object.keys(defaultOptions).forEach(key => {
-    if (app.layoutOptions[key] !== defaultOptions[key]) {
-      suggestions.push({
-        option: key,
-        currentValue: app.layoutOptions[key],
-        defaultValue: defaultOptions[key],
-        suggestion: `建议值: ${defaultOptions[key]}`
-      })
-    }
-  })
-  
-  return {
-    appId,
-    layoutType: app.layoutType,
-    suggestions
   }
 }
 
