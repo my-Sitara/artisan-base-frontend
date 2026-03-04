@@ -8,4 +8,3 @@ export default pinia
 
 export { useAppStore } from './app'
 export { useUserStore } from './user'
-export { useTabsStore } from './tabs'

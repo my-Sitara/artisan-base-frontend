@@ -1,9 +1,9 @@
 <template>
   <el-config-provider :locale="zhCn">
     <component :is="currentLayout">
-      <router-view v-slot="{ Component }">
+      <router-view v-slot="{ Component, route }">
         <keep-alive :include="cachedViews">
-          <component :is="Component" />
+          <component :is="Component" :key="route.fullPath" />
         </keep-alive>
       </router-view>
     </component>
@@ -11,11 +11,10 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, watch, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { useAppStore } from '@/stores/app'
-import { useTabsStore } from '@/stores/tabs'
 import { getMicroApp } from '@/config/microApps'
 import { layoutManager } from '@/core/layoutManager'
 
@@ -26,8 +25,32 @@ import EmbeddedLayout from '@/components/layout/EmbeddedLayout.vue'
 import BlankLayout from '@/components/layout/BlankLayout.vue'
 
 const route = useRoute()
+const router = useRouter()
 const appStore = useAppStore()
-const tabsStore = useTabsStore()
+
+// 缓存的视图列表 - 根据路由 meta.keepAlive 自动收集
+const cachedViews = ref([])
+
+// 监听路由变化，自动管理缓存视图（同时处理 true/false 两种情况）
+watch(
+  () => route.name,
+  (name) => {
+    if (!name) return
+    const idx = cachedViews.value.indexOf(name)
+    if (route.meta?.keepAlive) {
+      // keepAlive: true → 加入缓存列表
+      if (idx === -1) {
+        cachedViews.value.push(name)
+      }
+    } else {
+      // keepAlive: false → 从缓存列表移除
+      if (idx > -1) {
+        cachedViews.value.splice(idx, 1)
+      }
+    }
+  },
+  { immediate: true }
+)
 
 const layoutMap = {
   default: DefaultLayout,
@@ -83,8 +106,6 @@ const currentLayout = computed(() => {
     return DefaultLayout
   }
 })
-
-const cachedViews = computed(() => tabsStore.cachedViews)
 
 // Watch route changes
 watch(

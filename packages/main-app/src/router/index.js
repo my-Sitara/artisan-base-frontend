@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAppStore } from '@/stores/app'
-import { useTabsStore } from '@/stores/tabs'
+import { getMicroApp } from '@/config/microApps'
 
 const routes = [
   {
@@ -125,25 +125,23 @@ router.beforeEach((to, from, next) => {
     appStore.setActiveApp(null)
   }
   
+  // 从微应用配置同步 keepAlive 到路由 meta
+  const appId = to.meta.appId || to.params.appId
+  if (appId) {
+    const appConfig = getMicroApp(appId)
+    if (appConfig?.layoutOptions?.keepAlive !== undefined) {
+      to.meta.keepAlive = appConfig.layoutOptions.keepAlive
+    }
+  }
+  
   next()
 })
 
 router.afterEach((to, from) => {
   const appStore = useAppStore()
-  const tabsStore = useTabsStore()
   
   // 关闭 loading
   appStore.setLoading(false)
-  
-  // 添加标签页
-  if (to.meta.title) {
-    tabsStore.addTab({
-      name: to.name,
-      path: to.fullPath,
-      title: to.meta.title,
-      keepAlive: to.meta.keepAlive
-    })
-  }
 })
 
 export default router
