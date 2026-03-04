@@ -1,0 +1,19 @@
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: () => import('@/views/Home.vue')
+  },
+  {
+    path: '/list',
+    name: 'List',
+    component: () => import('@/views/List.vue')
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: () => import('@/views/About.vue')
+  }
+]
+
+export default routes

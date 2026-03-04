@@ -1,24 +1,29 @@
 {
   "name": "@artisan/cli",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "type": "module",
   "description": "Artisan 微前端脚手架 CLI 工具",
   "bin": {
     "artisan": "./bin/artisan.js"
   },
   "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js"
+  },
   "scripts": {
-    "lint": "eslint lib --ext .js"
+    "lint": "eslint bin lib --ext .js"
   },
   "dependencies": {
-    "chalk": "^4.1.2",
-    "commander": "^12.0.0",
-    "inquirer": "^8.2.6",
-    "fs-extra": "^11.2.0",
-    "ora": "^5.4.1",
-    "ejs": "^3.1.9"
+    "chalk": "^5.3.0",
+    "commander": "^13.1.0",
+    "@inquirer/prompts": "^7.5.0",
+    "fs-extra": "^11.3.0",
+    "ora": "^8.2.0",
+    "ejs": "^3.1.10",
+    "update-notifier": "^7.3.1"
   },
   "engines": {
-    "node": ">=18.12.0"
+    "node": ">=20.0.0"
   },
   "keywords": [
     "artisan",

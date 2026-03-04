@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iframe 子应用 - 列表</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div class="iframe-app">
+    <div class="app-header">
+      <h2>iframe 子应用</h2>
+      <nav class="nav-links">
+        <a href="/">首页</a>
+        <a href="/list.html" class="active">列表</a>
+      </nav>
+    </div>
+    
+    <div class="app-content">
+      <div class="card">
+        <div class="card-header">
+          <h3>iframe 子应用 - 列表页</h3>
+          <button class="btn btn-primary btn-sm" onclick="handleAdd()">新增</button>
+        </div>
+        
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>名称</th>
+              <th>状态</th>
+              <th>创建时间</th>
+              <th>描述</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- 数据将通过 JS 渲染 -->
+          </tbody>
+        </table>
+        
+        <div class="pagination">
+          <span>共 5 条</span>
+        </div>
+      </div>
+      
+      <div class="card" style="margin-top: 20px;">
+        <h4>跨应用导航</h4>
+        <button class="btn" onclick="goToVue3List()">Vue3 列表页</button>
+        <button class="btn" onclick="goToVue2List()">Vue2 列表页</button>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="/src/bridge.js"></script>
+  <script type="module">
+    const tableData = [
+      { id: 1, name: '项目 A', status: 'active', createTime: '2024-01-01 10:00:00', description: 'iframe 项目示例' },
+      { id: 2, name: '项目 B', status: 'inactive', createTime: '2024-01-02 11:00:00', description: '微前端演示' },
+      { id: 3, name: '项目 C', status: 'active', createTime: '2024-01-03 12:00:00', description: 'postMessage 通信' },
+      { id: 4, name: '项目 D', status: 'active', createTime: '2024-01-04 13:00:00', description: '子应用示例' },
+      { id: 5, name: '项目 E', status: 'inactive', createTime: '2024-01-05 14:00:00', description: '列表页演示' }
+    ]
+    
+    function renderTable() {
+      const tbody = document.getElementById('tableBody')
+      tbody.innerHTML = tableData.map(row => `
+        <tr>
+          <td>${row.id}</td>
+          <td>${row.name}</td>
+          <td><span class="tag ${row.status === 'active' ? 'tag-success' : 'tag-info'}">${row.status === 'active' ? '启用' : '禁用'}</span></td>
+          <td>${row.createTime}</td>
+          <td>${row.description}</td>
+          <td>
+            <button class="btn btn-link" onclick="handleEdit(${row.id})">编辑</button>
+            <button class="btn btn-link btn-danger" onclick="handleDelete(${row.id})">删除</button>
+          </td>
+        </tr>
+      `).join('')
+    }
+    
+    window.handleAdd = function() {
+      alert('点击了新增按钮')
+    }
+    
+    window.handleEdit = function(id) {
+      const row = tableData.find(r => r.id === id)
+      alert(`编辑: ${row?.name}`)
+    }
+    
+    window.handleDelete = function(id) {
+      if (confirm('确定删除吗?')) {
+        const index = tableData.findIndex(r => r.id === id)
+        if (index > -1) {
+          tableData.splice(index, 1)
+          renderTable()
+        }
+      }
+    }
+    
+    window.goToVue3List = function() {
+      if (window.iframeBridge) {
+        window.iframeBridge.navigateTo('vue3-sub-app', '/list')
+      }
+    }
+    
+    window.goToVue2List = function() {
+      if (window.iframeBridge) {
+        window.iframeBridge.navigateTo('vue2-sub-app', '/list')
+      }
+    }
+    
+    renderTable()
+  </script>
+</body>
+</html>
