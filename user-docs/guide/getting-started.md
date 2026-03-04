@@ -15,10 +15,18 @@ npm install
 
 ## 启动开发环境
 
-### 启动所有应用
+### 启动所有应用（API 模式）
 
 ```bash
 npm run dev:all
+```
+
+### 启动所有应用（本地 mock 模式）
+
+使用本地 mock 数据，无需后端服务：
+
+```bash
+npm run dev:all:mock
 ```
 
 ### 单独启动
@@ -62,6 +70,15 @@ artisan-base-frontend/
 └── README.md
 ```
 
+## 环境变量
+
+主应用支持以下环境变量（在 `packages/main-app/.env.*` 中配置）：
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `VITE_USE_MICRO_APPS_API` | `false` | `true` 从后端 API 加载微应用配置，`false` 使用本地 mock |
+| `VITE_MICRO_APPS_API_URL` | `/api/micro-apps` | 后端 API 地址（仅在 `VITE_USE_MICRO_APPS_API=true` 时生效） |
+
 ## 使用 CLI 创建子应用
 
 ```bash
@@ -77,6 +94,9 @@ artisan create sub-app my-app --type vue2
 
 # 创建 iframe 子应用
 artisan create sub-app my-app --type iframe
+
+# 查看支持的模板
+artisan list
 ```
 
 ## 下一步
@@ -84,3 +104,4 @@ artisan create sub-app my-app --type iframe
 - [了解主应用](./main-app.md)
 - [了解子应用](./sub-apps.md)
 - [布局系统](./layout-system.md)
+- [部署指南](./deployment.md)

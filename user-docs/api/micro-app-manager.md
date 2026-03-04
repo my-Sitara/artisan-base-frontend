@@ -1,6 +1,6 @@
 # MicroAppManager API
 
-微应用实例管理器，负责子应用的加载、卸载、刷新等操作。
+微应用实例管理器，负责子应用的加载、卸载、刷新等操作。每个 `appId` 同时只允许加载一个实例。
 
 ## 导入
 
@@ -15,101 +15,114 @@ import { microAppManager } from '@/core/microAppManager'
 加载微应用。
 
 **参数：**
-- `appId` (string) - 应用ID
-- `container` (HTMLElement | string) - 容器元素或选择器
+- `appId` (string) - 应用 ID
+- `container` (HTMLElement | string) - 容器元素或 CSS 选择器字符串
 - `options` (Object) - 额外选项
-  - `props` (Object) - 传递给子应用的 props
+  - `props` (Object) - 额外传递给子应用的 props
+  - `mainRouter` (Router) - 主应用路由实例
 
-**返回：** `Promise<{ instanceId, app, config }>`
+**返回：** `Promise<{ appId, app, config } | null>`（link 类型返回 null）
 
 ```javascript
 const result = await microAppManager.load(
   'vue3-sub-app',
-  '#container',
+  document.getElementById('container'),
   { props: { subPath: '/list' } }
 )
 ```
 
-### unload(instanceId)
+### unload(appId)
 
-卸载微应用实例。
+卸载微应用。
 
 **参数：**
-- `instanceId` (string) - 实例ID
+- `appId` (string) - 应用 ID
 
 ```javascript
-await microAppManager.unload('vue3-sub-app_1_1234567890')
+await microAppManager.unload('vue3-sub-app')
 ```
 
-### reload(instanceId)
+### reload(appId)
 
-刷新微应用实例。
+刷新微应用（先卸载再重新加载）。
 
 **参数：**
-- `instanceId` (string) - 实例ID
+- `appId` (string) - 应用 ID
 
 ```javascript
-await microAppManager.reload(instanceId)
+await microAppManager.reload('vue3-sub-app')
 ```
 
 ### preload(appIds)
 
-预加载微应用。
+预加载微应用资源（不挂载）。
 
 **参数：**
-- `appIds` (string[]) - 应用ID列表，为空则预加载所有配置了 preload 的应用
+- `appIds` (string[]) - 应用 ID 列表，为空则预加载所有配置了 `preload: true` 的在线应用
 
 ```javascript
+// 预加载指定应用
 await microAppManager.preload(['vue3-sub-app', 'vue2-sub-app'])
+
+// 预加载所有配置了 preload 的应用
+await microAppManager.preload()
 ```
 
 ### setAppStatus(appId, status)
 
-设置应用上下线状态。
+设置应用上下线状态。下线时会自动卸载已加载的实例。
 
 **参数：**
-- `appId` (string) - 应用ID
+- `appId` (string) - 应用 ID
 - `status` ('online' | 'offline') - 状态
 
 ```javascript
 microAppManager.setAppStatus('vue3-sub-app', 'offline')
 ```
 
-### getInstanceCount(appId)
+### isAppLoaded(appId)
 
-获取实例数量。
+判断应用是否已加载。
 
 **参数：**
-- `appId` (string) - 应用ID，可选
+- `appId` (string) - 应用 ID
+
+**返回：** `boolean`
 
 ```javascript
-const count = microAppManager.getInstanceCount('vue3-sub-app')
+const loaded = microAppManager.isAppLoaded('vue3-sub-app')
 ```
 
-### getAllInstances()
+### getLoadedCount()
 
-获取所有实例。
+获取已加载应用数量。
 
-**返回：** `Object` - 实例映射
+**返回：** `number`
 
 ```javascript
-const instances = microAppManager.getAllInstances()
+const count = microAppManager.getLoadedCount()
 ```
 
 ### getErrorLogs(appId)
 
-获取错误日志。
+获取错误日志。最多保留最近 100 条记录。
 
 **参数：**
-- `appId` (string) - 应用ID，可选
+- `appId` (string) - 应用 ID，可选；不传则返回所有错误日志
+
+**返回：** `Array<{ appId, message, stack, time }>`
 
 ```javascript
+// 获取所有错误日志
 const logs = microAppManager.getErrorLogs()
+
+// 获取指定应用的错误日志
+const appLogs = microAppManager.getErrorLogs('vue3-sub-app')
 ```
 
 ### clearErrorLogs()
 
-清空错误日志。
+清空所有错误日志。
 
 ```javascript
 microAppManager.clearErrorLogs()
@@ -117,17 +130,18 @@ microAppManager.clearErrorLogs()
 
 ## 属性
 
-### instances
+### loadedApps
 
-响应式的实例映射。
+响应式对象，记录所有已加载的应用信息，以 `appId` 为键。
 
 ```javascript
-const instances = microAppManager.instances
+// 结构：{ appId: { app, config, status, loadTime, errors, container } }
+const apps = microAppManager.loadedApps
 ```
 
 ### errorLogs
 
-响应式的错误日志数组。
+响应式数组，记录错误日志。
 
 ```javascript
 const logs = microAppManager.errorLogs
@@ -135,8 +149,19 @@ const logs = microAppManager.errorLogs
 
 ### preloadStatus
 
-预加载状态映射。
+预加载状态映射，以 `appId` 为键。
 
 ```javascript
+// 结构：{ appId: 'prefetched' }
 const status = microAppManager.preloadStatus
+```
+
+## 全局调试
+
+主应用启动时，管理器实例被挂载到 `window.__ARTISAN_MICRO_APP_MANAGER__`，可在浏览器控制台直接访问：
+
+```javascript
+// 在控制台中调试
+window.__ARTISAN_MICRO_APP_MANAGER__.loadedApps
+window.__ARTISAN_MICRO_APP_MANAGER__.getErrorLogs()
 ```
