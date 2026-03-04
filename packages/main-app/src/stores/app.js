@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { microApps, getMicroApp, updateMicroAppConfig } from '@/config/microApps'
+import { getCurrentMicroApps, getMicroApp, updateMicroAppConfig, loadMicroApps, initMicroApps } from '@/config/microApps'
 
 export const useAppStore = defineStore('app', () => {
-  // 当前激活的应用ID
+  // 当前激活的应用 ID
   const activeAppId = ref(null)
   
   // 侧边栏折叠状态
@@ -12,8 +12,38 @@ export const useAppStore = defineStore('app', () => {
   // 全局 loading 状态
   const loading = ref(false)
   
-  // 微应用列表（响应式）
-  const apps = ref([...microApps])
+  // 微应用列表（响应式）- 初始使用空数组
+  const apps = ref([])
+
+  // 加载微应用配置（支持 mock 和 api 两种模式）
+  async function loadMicroAppConfigs(options = {}) {
+    loading.value = true
+    try {
+      const loadedApps = await loadMicroApps(options)
+      apps.value = [...loadedApps]
+      console.log('[AppStore] Micro apps loaded:', loadedApps.length, 'apps from', options.source || 'mock')
+    } catch (error) {
+      console.error('[AppStore] Failed to load micro apps:', error)
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 初始化微应用配置（根据环境变量自动选择数据源）
+  async function initialize(apiUrl) {
+    loading.value = true
+    try {
+      const loadedApps = await initMicroApps(apiUrl)
+      apps.value = [...loadedApps]
+      console.log('[AppStore] Micro apps initialized:', loadedApps.length, 'apps')
+    } catch (error) {
+      console.error('[AppStore] Failed to initialize micro apps:', error)
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
 
   // 计算属性
   const activeApp = computed(() => {
@@ -59,7 +89,6 @@ export const useAppStore = defineStore('app', () => {
 
   function addApp(appConfig) {
     apps.value.push(appConfig)
-    microApps.push(appConfig)
   }
 
   function removeApp(appId) {
@@ -67,14 +96,11 @@ export const useAppStore = defineStore('app', () => {
     if (index !== -1) {
       apps.value.splice(index, 1)
     }
-    const configIndex = microApps.findIndex(app => app.id === appId)
-    if (configIndex !== -1) {
-      microApps.splice(configIndex, 1)
-    }
   }
 
   function refreshApps() {
-    apps.value = [...microApps]
+    // 重新从配置模块获取最新的应用列表
+    apps.value = [...getCurrentMicroApps()]
   }
 
   return {
@@ -98,7 +124,9 @@ export const useAppStore = defineStore('app', () => {
     setAppStatus,
     addApp,
     removeApp,
-    refreshApps
+    refreshApps,
+    loadMicroAppConfigs,
+    initialize
   }
 }, {
   persist: {

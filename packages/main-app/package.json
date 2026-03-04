@@ -5,6 +5,7 @@
   "description": "微前端主应用",
   "scripts": {
     "dev": "vite --port 8080",
+    "dev:mock": "vite --mode mock --port 8080",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.vue,.ts,.tsx",

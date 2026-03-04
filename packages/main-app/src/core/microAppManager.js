@@ -1,6 +1,6 @@
 import { loadMicroApp, prefetchApps } from 'qiankun'
 import { reactive, markRaw } from 'vue'
-import { microApps, getMicroApp, updateMicroAppConfig } from '@/config/microApps'
+import { getCurrentMicroApps, getMicroApp, updateMicroAppConfig } from '@/config/microApps'
 import { useUserStore } from '@/stores/user'
 import { bridge } from './bridge'
 
@@ -409,12 +409,12 @@ class MicroAppManager {
 
   /**
    * 预加载微应用
-   * @param {Array} appIds - 应用ID列表
+   * @param {Array} appIds - 应用ID 列表
    */
   async preload(appIds = []) {
     const apps = appIds.length > 0 
       ? appIds.map(id => getMicroApp(id)).filter(Boolean)
-      : microApps.filter(app => app.preload && app.type !== 'iframe' && app.status === 'online')
+      : getCurrentMicroApps().filter(app => app.preload && app.type !== 'iframe' && app.status === 'online')
 
     const prefetchList = apps.map(app => ({
       name: app.id,

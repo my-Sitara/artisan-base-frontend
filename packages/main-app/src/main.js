@@ -7,6 +7,7 @@ import 'element-plus/dist/index.css'
 
 import App from './App.vue'
 import router from './router'
+import { useAppStore } from '@/stores/app'
 import { setupBridge } from './core/bridge'
 import { microAppManager } from './core/microAppManager'
 
@@ -19,6 +20,11 @@ const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 
 app.use(pinia)
+
+// 初始化微应用配置（在路由之前）
+const appStore = useAppStore()
+await appStore.initialize()
+
 app.use(router)
 app.use(ElementPlus)
 

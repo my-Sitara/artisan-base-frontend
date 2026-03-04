@@ -9,10 +9,12 @@
   ],
   "scripts": {
     "dev:main": "npm run dev --workspace=@artisan/main-app",
+    "dev:main:mock": "npm run dev:mock --workspace=@artisan/main-app",
     "dev:vue3": "npm run dev --workspace=@artisan/vue3-sub-app",
     "dev:vue2": "npm run dev --workspace=@artisan/vue2-sub-app",
     "dev:iframe": "npm run dev --workspace=@artisan/iframe-sub-app",
     "dev:all": "npm-run-all --parallel dev:main dev:vue3 dev:vue2 dev:iframe",
+    "dev:all:mock": "npm-run-all --parallel dev:main:mock dev:vue3 dev:vue2 dev:iframe",
     "build:main": "npm run build --workspace=@artisan/main-app",
     "build:vue3": "npm run build --workspace=@artisan/vue3-sub-app",
     "build:vue2": "npm run build --workspace=@artisan/vue2-sub-app",

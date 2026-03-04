@@ -1,8 +1,12 @@
 /**
  * 微应用配置管理模块
  * 
- * 此模块定义了所有微应用的配置信息，包括基本属性、布局配置等。
- * 布局配置通过 layoutConfig 模块进行标准化和验证，确保布局配置的合理性。
+ * 此模块负责加载和管理所有微应用的配置信息。
+ * 支持两种数据源模式：
+ * - mock: 从本地 mock 文件加载数据
+ * - api: 从后端 API 接口加载数据
+ * 
+ * 通过环境变量 VITE_USE_MICRO_APPS_API 控制使用哪种模式
  * 
  * 配置项说明：
  * - id: 应用唯一标识
@@ -20,89 +24,98 @@
  */
 import { normalizeLayoutConfig, getDefaultLayoutOptions } from './layoutConfig'
 
-// 通用的布局选项工厂函数
+// 通用的布局选项工厂函数（在数据加载后调用）
 const createLayoutOptions = (type, overrides = {}) => {
   const defaults = getDefaultLayoutOptions(type)
   return { ...defaults, ...overrides }
 }
 
-// 定义基础微应用配置（不含标准化的布局选项）
-const baseMicroApps = [
-  {
-    id: 'vue3-sub-app',
-    name: 'Vue3 子应用',
-    entry: '//localhost:7080',
-    activeRule: '/vue3',
-    container: '#micro-app-container',
-    status: 'online',
-    version: '1.0.0',
-    lastModified: Date.now(),
-    preload: true,
-    type: 'vue3',
-    layoutType: 'default',
-    layoutOptions: createLayoutOptions('default', {
-      showHeader: true,
-      showSidebar: true,
-      keepAlive: false
-    }),
-    props: {
-      routerBase: '/vue3'
-    }
-  },
-  {
-    id: 'vue2-sub-app',
-    name: 'Vue2 子应用',
-    entry: '//localhost:3000',
-    activeRule: '/vue2',
-    container: '#micro-app-container',
-    status: 'online',
-    version: '1.0.0',
-    lastModified: Date.now(),
-    preload: true,
-    type: 'vue2',
-    layoutType: 'default',
-    layoutOptions: createLayoutOptions('default', {
-      showHeader: true,
-      showSidebar: true,
-      keepAlive: false
-    }),
-    props: {
-      routerBase: '/vue2'
-    }
-  },
-  {
-    id: 'iframe-sub-app',
-    name: 'iframe 子应用',
-    entry: '//localhost:9080',
-    activeRule: '/iframe',
-    container: '#micro-app-container',
-    status: 'online',
-    version: '1.0.0',
-    lastModified: Date.now(),
-    preload: false,
-    type: 'iframe',
-    layoutType: 'embedded',
-    layoutOptions: createLayoutOptions('embedded', {
-      showSidebar: false,
-      keepAlive: false
-    })
-  }
-]
-
-// 标准化所有微应用的布局配置
-export const microApps = baseMicroApps.map(app => {
-  const normalized = normalizeLayoutConfig(app.layoutType, app.layoutOptions)
-  return {
-    ...app,
-    layoutType: normalized.layoutType,
-    layoutOptions: normalized.layoutOptions
-  }
-})
+// 内部存储
+let microApps = []
+let isLoaded = false
+let dataSource = 'mock' // 'mock' or 'api'
 
 /**
- * 获取微应用配置
+ * 处理微应用原始数据，应用布局配置标准化
+ * @param {Array} rawApps - 原始应用数据
+ * @returns {Array} 标准化后的应用配置
+ */
+export function processMicroAppsData(rawApps) {
+  return rawApps.map(app => {
+    const normalized = normalizeLayoutConfig(app.layoutType, app.layoutOptions || {})
+    return {
+      ...app,
+      layoutType: normalized.layoutType,
+      layoutOptions: normalized.layoutOptions
+    }
+  })
+}
+
+/**
+ * 加载微应用配置，支持 mock 和 api 两种模式
+ * @param {Object} options - 加载选项
+ * @param {'mock'|'api'} options.source - 数据源类型
+ * @param {string} options.apiUrl - API 地址
+ * @returns {Promise<Array>} 微应用配置数组
+ */
+export async function loadMicroApps(options = {}) {
+  const { source = 'mock', apiUrl = '/api/micro-apps' } = options
+  
+  try {
+    let rawData
+    
+    if (source === 'mock') {
+      console.log('[microApps] Loading from mock data')
+      // 动态导入 mock 数据
+      const mockData = await import('@/mock/microApps.js')
+      rawData = mockData.default.data.apps || mockData.default.apps || []
+    } else if (source === 'api') {
+      console.log('[microApps] Loading from API:', apiUrl)
+      const response = await fetch(apiUrl)
+      const data = await response.json()
+      rawData = data.apps || data.data?.apps || []
+    }
+    
+    // 处理并标准化数据
+    microApps = processMicroAppsData(rawData)
+    isLoaded = true
+    dataSource = source
+    
+    console.log(`[microApps] Successfully loaded ${microApps.length} apps from ${source}`)
+    return microApps
+  } catch (error) {
+    console.error('[microApps] Failed to load micro apps:', error)
+    // 失败时使用默认配置作为降级方案
+    throw error
+  }
+}
+
+/**
+ * 初始化微应用配置（根据环境变量自动选择数据源）
+ * @param {string} customApiUrl - 自定义 API 地址（可选）
+ * @returns {Promise<Array>} 微应用配置数组
+ */
+export async function initMicroApps(customApiUrl) {
+  const useApi = import.meta.env.VITE_USE_MICRO_APPS_API === 'true'
+  const defaultApiUrl = import.meta.env.VITE_MICRO_APPS_API_URL || '/api/micro-apps'
+  const apiUrl = customApiUrl || defaultApiUrl
+  
+  const source = useApi ? 'api' : 'mock'
+  return loadMicroApps({ source, apiUrl })
+}
+
+/**
+ * 获取当前已加载的微应用列表
+ * @returns {Array} 微应用配置数组
+ */
+export function getCurrentMicroApps() {
+  return [...microApps]
+}
+
+/**
+ * 获取指定微应用配置
  * @param {string} appId - 应用 ID
- * @returns {Object|undefined}
+ * @returns {Object|undefined} 应用配置
  */
 export function getMicroApp(appId) {
   return microApps.find(app => app.id === appId)
@@ -137,4 +150,34 @@ export function updateMicroAppConfig(appId, config) {
   }
 }
 
-export default microApps
+/**
+ * 检查数据是否已加载
+ * @returns {boolean}
+ */
+export function isMicroAppsLoaded() {
+  return isLoaded
+}
+
+/**
+ * 获取当前数据源类型
+ * @returns {'mock'|'api'}
+ */
+export function getDataSource() {
+  return dataSource
+}
+
+// 初始化时先使用空数组
+microApps = []
+isLoaded = false
+
+export default {
+  loadMicroApps,
+  initMicroApps,
+  getCurrentMicroApps,
+  getMicroApp,
+  getOnlineMicroApps,
+  getMicroAppsByType,
+  updateMicroAppConfig,
+  isMicroAppsLoaded,
+  getDataSource
+}

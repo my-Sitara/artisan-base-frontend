@@ -42,6 +42,11 @@ npm install
 ```bash
 npm run dev:all
 ```
+### 本地mock启动main-app 和其他子应用
+
+```bash
+npm run dev:all:mock
+```
 
 ### 单独启动应用
 
