@@ -98,6 +98,10 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
+  function deleteApp(appId) {
+    return removeApp(appId)
+  }
+
   function refreshApps() {
     // 重新从配置模块获取最新的应用列表
     apps.value = [...getCurrentMicroApps()]
@@ -124,6 +128,7 @@ export const useAppStore = defineStore('app', () => {
     setAppStatus,
     addApp,
     removeApp,
+    deleteApp,
     refreshApps,
     loadMicroAppConfigs,
     initialize

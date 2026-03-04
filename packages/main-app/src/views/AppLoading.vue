@@ -3,6 +3,10 @@
     <div class="page-header">
       <h3>子应用加载管理</h3>
       <div class="header-actions">
+        <el-button type="primary" @click="showAddApp">
+          <el-icon><Plus /></el-icon>
+          新增应用
+        </el-button>
         <el-button @click="handleRefreshAll">
           <el-icon><Refresh /></el-icon>
           刷新列表
@@ -17,7 +21,7 @@
       </template>
       
       <el-table :data="apps" style="width: 100%;" row-key="id">
-        <el-table-column prop="id" label="应用 ID" width="150" />
+        <el-table-column prop="id" label="应用ID" width="150" />
         <el-table-column prop="name" label="应用名称" width="120" />
         <el-table-column prop="type" label="类型" width="100">
           <template #default="{ row }">
@@ -93,6 +97,14 @@
             >
               配置
             </el-button>
+            <el-button 
+              type="danger" 
+              link 
+              size="small"
+              @click="handleDeleteApp(row)"
+            >
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -132,8 +144,8 @@
         label-position="right"
       >
         <el-divider content-position="left">基本信息</el-divider>
-        <el-form-item label="应用 ID">
-          <el-input :model-value="editForm.id" disabled />
+        <el-form-item label="应用ID">
+          <el-input v-model="editForm.id" :disabled="isEditMode" placeholder="例如：my-sub-app" />
         </el-form-item>
         <el-form-item label="应用名称">
           <el-input v-model="editForm.name" placeholder="输入应用名称" />
@@ -287,7 +299,7 @@ import { useAppStore } from '@/stores/app'
 import { microAppManager } from '@/core/microAppManager'
 import { layoutManager } from '@/core/layoutManager'
 import { Refresh, View } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   LayoutPreviewComponents,
   getLayoutDescription,
@@ -305,6 +317,7 @@ const preloadStatus = computed(() => microAppManager.preloadStatus)
 const showDetailDialog = ref(false)
 const currentApp = ref(null)
 const showEditDialog = ref(false)
+const isEditMode = ref(false)  // 标记是否为编辑模式
 const editForm = ref(null)
 const layoutOptions = ref({
   showHeader: true,
@@ -374,28 +387,56 @@ function showAppDetail(app) {
 }
 
 function showEditApp(app) {
-  editForm.value = {
-    id: app.id,
-    name: app.name,
-    type: app.type,
-    entry: app.entry,
-    version: app.version,
-    activeRule: app.activeRule || '',
-    preload: app.preload || false,
-    layoutType: app.layoutType || 'default',
-    layoutOptions: {
-      showHeader: app.layoutOptions?.showHeader ?? true,
-      showSidebar: app.layoutOptions?.showSidebar ?? true,
-      showFooter: app.layoutOptions?.showFooter ?? false,
-      keepAlive: app.layoutOptions?.keepAlive ?? false
-    },
-    routerBase: app.props?.routerBase || ''
+  isEditMode.value = true
+  editForm.value = { ...app }
+  layoutOptions.value = {
+    showHeader: app.layoutOptions?.showHeader ?? true,
+    showSidebar: app.layoutOptions?.showSidebar ?? false,
+    showFooter: app.layoutOptions?.showFooter ?? false,
+    keepAlive: app.layoutOptions?.keepAlive ?? false
+  }
+  showEditDialog.value = true
+}
+
+function handleSaveEdit() {
+  if (!editForm.value) return
+  
+  const config = {
+    name: editForm.value.name,
+    type: editForm.value.type,
+    entry: editForm.value.entry,
+    version: editForm.value.version,
+    activeRule: editForm.value.activeRule,
+    preload: editForm.value.preload,
+    layoutType: editForm.value.layoutType,
+    layoutOptions: { ...layoutOptions.value },
+    props: {
+      routerBase: editForm.value.routerBase
+    }
   }
   
-  // 初始化布局选项
-  layoutOptions.value = { ...editForm.value.layoutOptions }
+  if (!isEditMode.value) {
+    // 新增模式
+    config.id = editForm.value.id
+    config.status = editForm.value.status || 'online'
+    config.container = '#micro-app-container'
+    config.lastModified = Date.now()
+    appStore.addApp(config)
+    ElMessage.success('应用已添加')
+  } else {
+    // 编辑模式
+    config.lastModified = Date.now()
+    appStore.updateApp(editForm.value.id, config)
+    
+    // 如果当前正在查看这个应用，立即应用新的布局配置
+    const currentRouteAppId = route.params.appId || route.meta?.appId
+    if (currentRouteAppId === editForm.value.id) {
+      layoutManager.setLayoutFromMicroApp(config)
+    }
+    ElMessage.success('配置已保存')
+  }
   
-  showEditDialog.value = true
+  showEditDialog.value = false
 }
 
 // 当布局类型改变时，根据布局类型调整布局选项
@@ -548,34 +589,46 @@ function showLayoutPreview() {
   showLayoutPreviewDialog.value = true;
 }
 
-function handleSaveEdit() {
-  if (!editForm.value) return
-  
-  const config = {
-    name: editForm.value.name,
-    type: editForm.value.type,
-    entry: editForm.value.entry,
-    version: editForm.value.version,
-    activeRule: editForm.value.activeRule,
-    preload: editForm.value.preload,
-    layoutType: editForm.value.layoutType,
-    layoutOptions: { ...editForm.value.layoutOptions },
-    props: {
-      routerBase: editForm.value.routerBase
+function handleDeleteApp(app) {
+  ElMessageBox.confirm(
+    `确定要删除应用 ${app.name} 吗？`,
+    '提示',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
     }
+  ).then(() => {
+    appStore.deleteApp(app.id)
+    ElMessage.success('应用已删除')
+  }).catch(() => {
+    ElMessage.info('已取消删除')
+  })
+}
+
+function showAddApp() {
+  editForm.value = {
+    id: '',
+    name: '',
+    type: 'vue3',
+    entry: '',
+    version: '',
+    activeRule: '',
+    preload: false,
+    layoutType: 'default',
+    layoutOptions: {
+      showHeader: true,
+      showSidebar: true,
+      showFooter: false,
+      keepAlive: false
+    },
+    routerBase: ''
   }
   
-  // 更新微应用配置
-  appStore.updateApp(editForm.value.id, config)
+  // 初始化布局选项
+  layoutOptions.value = { ...editForm.value.layoutOptions }
   
-  // 如果当前正在查看这个应用，立即应用新的布局配置
-  const currentRouteAppId = route.params.appId || route.meta?.appId
-  if (currentRouteAppId === editForm.value.id) {
-    layoutManager.setLayoutFromMicroApp(config)
-  }
-  
-  showEditDialog.value = false
-  ElMessage.success('配置已保存')
+  showEditDialog.value = true
 }
 
 onMounted(() => {
