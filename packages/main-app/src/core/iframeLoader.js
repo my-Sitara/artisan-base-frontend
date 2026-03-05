@@ -34,7 +34,7 @@ class IframeLoader {
       id,
       src,
       container,
-      sandbox = 'allow-scripts allow-same-origin allow-forms allow-popups',
+      sandbox = 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads',
       autoHeight = true,
       style = {}
     } = options

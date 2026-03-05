@@ -179,7 +179,7 @@ class MicroAppManager {
     iframe.id = `iframe-${appId}`
     iframe.src = config.entry + (options.path || '')
     iframe.style.cssText = 'width: 100%; height: 100%; border: none;'
-    iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-popups'
+    iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads'
     
     containerElement.innerHTML = ''
     containerElement.appendChild(iframe)
