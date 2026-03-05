@@ -499,6 +499,19 @@ class MicroAppManager {
   clearErrorLogs() {
     this.errorLogs.length = 0
   }
+
+  /**
+   * 删除单条错误日志
+   * @param {Object} log - 错误日志对象
+   */
+  deleteError(log) {
+    const index = this.errorLogs.findIndex(
+      item => item.time === log.time && item.appId === log.appId
+    )
+    if (index !== -1) {
+      this.errorLogs.splice(index, 1)
+    }
+  }
 }
 
 // 导出单例
