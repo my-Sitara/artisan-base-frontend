@@ -55,13 +55,13 @@ async function loadApp() {
   error.value = null
   
   try {
-    // 如果应用已被其他页面加载（如 MultiInstancePage），先卸载
-    // 这处理了页面切换时的清理时序问题
+    // 处理与多应用同屏页面的冲突：先卸载已加载的实例
     if (microAppManager.isAppLoaded(props.appId)) {
       console.log(`[MicroAppContainer] App ${props.appId} already loaded, unloading first`)
       await microAppManager.unload(props.appId)
     }
     
+    // 加载应用到当前容器
     const result = await microAppManager.load(
       props.appId,
       containerRef.value,
@@ -108,9 +108,8 @@ onMounted(() => {
 // onUnmounted 时组件 DOM 已从文档中移除，qiankun 子应用的 Vue 实例
 // 在 unmount 时找不到有效的 vnode（已为 null），导致报错
 onBeforeUnmount(async () => {
-  // 只卸载状态为 mounted 的应用，避免干扰正在进行的加载操作
-  const appInfo = microAppManager.loadedApps[props.appId]
-  if (appInfo && appInfo.status === 'mounted') {
+  // 无条件卸载应用，确保页面切换时实例被完全清理
+  if (microAppManager.isAppLoaded(props.appId)) {
     await unloadApp()
   }
 })

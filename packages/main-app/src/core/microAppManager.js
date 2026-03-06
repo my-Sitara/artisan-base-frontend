@@ -10,8 +10,11 @@ import { bridge } from './bridge'
  */
 class MicroAppManager {
   constructor() {
-    // 存储所有运行中的应用 { appId: { app, config, status, loadTime, errors } }
+    // 存储所有运行中的应用 { appId: { app, config, status, loadTime, errors, container } }
     this.loadedApps = reactive({})
+    
+    // 操作状态：防止并发操作冲突
+    this.operationStatus = {}
     
     // 心跳检测定时器
     this.heartbeatTimers = {}
@@ -47,41 +50,53 @@ class MicroAppManager {
    * @returns {Promise<Object>} 应用信息
    */
   async load(appId, container, options = {}) {
-    const config = getMicroApp(appId)
-    
-    if (!config) {
-      const error = new Error(`Micro app not found: ${appId}`)
-      this.logError(appId, error)
-      throw error
+    // 检查是否有正在进行的操作
+    if (this.operationStatus[appId]) {
+      console.log(`[MicroAppManager] Operation in progress for ${appId}, waiting...`)
+      // 等待操作完成
+      while (this.operationStatus[appId]) {
+        await new Promise(resolve => setTimeout(resolve, 50))
+      }
     }
 
-    if (config.status === 'offline') {
-      const error = new Error(`Micro app is offline: ${appId}`)
-      this.logError(appId, error)
-      throw error
-    }
-
-    // 防止重复加载同一应用
-    if (this.isAppLoaded(appId)) {
-      const error = new Error(`Micro app already loaded: ${appId}`)
-      this.logError(appId, error)
-      throw error
-    }
-
-    // iframe 类型走单独的加载器
-    if (config.type === 'iframe') {
-      return this.loadIframe(appId, container, options)
-    }
-
-    // link 类型直接跳转
-    if (config.type === 'link') {
-      window.open(config.entry, '_blank')
-      return null
-    }
-
-    const userStore = useUserStore()
+    // 设置操作状态
+    this.operationStatus[appId] = 'loading'
 
     try {
+      const config = getMicroApp(appId)
+      
+      if (!config) {
+        const error = new Error(`Micro app not found: ${appId}`)
+        this.logError(appId, error)
+        throw error
+      }
+
+      if (config.status === 'offline') {
+        const error = new Error(`Micro app is offline: ${appId}`)
+        this.logError(appId, error)
+        throw error
+      }
+
+      // 防止重复加载同一应用
+      if (this.isAppLoaded(appId)) {
+        const error = new Error(`Micro app already loaded: ${appId}`)
+        this.logError(appId, error)
+        throw error
+      }
+
+      // iframe 类型走单独的加载器
+      if (config.type === 'iframe') {
+        return this.loadIframe(appId, container, options)
+      }
+
+      // link 类型直接跳转
+      if (config.type === 'link') {
+        window.open(config.entry, '_blank')
+        return null
+      }
+
+      const userStore = useUserStore()
+
       const containerElement = typeof container === 'string' 
         ? document.querySelector(container) 
         : container
@@ -154,6 +169,9 @@ class MicroAppManager {
         this.loadedApps[appId].errors.push(error.message)
       }
       throw error
+    } finally {
+      // 清除操作状态
+      delete this.operationStatus[appId]
     }
   }
 
@@ -164,63 +182,68 @@ class MicroAppManager {
    * @param {Object} options - 额外选项
    */
   async loadIframe(appId, container, options = {}) {
-    const config = getMicroApp(appId)
-    const userStore = useUserStore()
+    try {
+      const config = getMicroApp(appId)
+      const userStore = useUserStore()
 
-    const containerElement = typeof container === 'string' 
-      ? document.querySelector(container) 
-      : container
+      const containerElement = typeof container === 'string' 
+        ? document.querySelector(container) 
+        : container
 
-    if (!containerElement) {
-      throw new Error(`Container not found: ${container}`)
-    }
+      if (!containerElement) {
+        throw new Error(`Container not found: ${container}`)
+      }
 
-    const iframe = document.createElement('iframe')
-    iframe.id = `iframe-${appId}`
-    iframe.src = config.entry + (options.path || '')
-    iframe.style.cssText = 'width: 100%; height: 100%; border: none;'
-    iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads'
-    
-    containerElement.innerHTML = ''
-    containerElement.appendChild(iframe)
-
-    // 记录应用
-    this.loadedApps[appId] = {
-      app: markRaw(iframe),
-      config: { ...config },
-      status: 'loading',
-      loadTime: Date.now(),
-      errors: [],
-      container: containerElement,
-      isIframe: true
-    }
-
-    // iframe 加载完成后发送 token
-    iframe.onload = () => {
-      this.loadedApps[appId].status = 'mounted'
+      const iframe = document.createElement('iframe')
+      iframe.id = `iframe-${appId}`
+      iframe.src = config.entry + (options.path || '')
+      iframe.style.cssText = 'width: 100%; height: 100%; border: none;'
+      iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads'
       
-      // 发送初始化消息
-      bridge.sendToIframe(iframe, {
-        type: 'INIT',
-        payload: {
-          token: userStore.token,
-          appId: appId
-        }
-      })
-      
-      // 启动心跳
-      this.startIframeHeartbeat(appId, iframe)
-    }
+      containerElement.innerHTML = ''
+      containerElement.appendChild(iframe)
 
-    iframe.onerror = (error) => {
-      this.loadedApps[appId].status = 'error'
-      this.logError(appId, new Error('iframe load failed'))
-    }
+      // 记录应用
+      this.loadedApps[appId] = {
+        app: markRaw(iframe),
+        config: { ...config },
+        status: 'loading',
+        loadTime: Date.now(),
+        errors: [],
+        container: containerElement,
+        isIframe: true
+      }
 
-    return {
-      appId,
-      iframe,
-      config
+      // iframe 加载完成后发送 token
+      iframe.onload = () => {
+        this.loadedApps[appId].status = 'mounted'
+        
+        // 发送初始化消息
+        bridge.sendToIframe(iframe, {
+          type: 'INIT',
+          payload: {
+            token: userStore.token,
+            appId: appId
+          }
+        })
+        
+        // 启动心跳
+        this.startIframeHeartbeat(appId, iframe)
+      }
+
+      iframe.onerror = (error) => {
+        this.loadedApps[appId].status = 'error'
+        this.logError(appId, new Error('iframe load failed'))
+      }
+
+      return {
+        appId,
+        iframe,
+        config
+      }
+    } finally {
+      // 清除操作状态
+      delete this.operationStatus[appId]
     }
   }
 
@@ -229,10 +252,23 @@ class MicroAppManager {
    * @param {string} appId - 应用ID
    */
   async unload(appId) {
+    // 检查是否有正在进行的操作
+    if (this.operationStatus[appId]) {
+      console.log(`[MicroAppManager] Operation in progress for ${appId}, waiting...`)
+      // 等待操作完成
+      while (this.operationStatus[appId]) {
+        await new Promise(resolve => setTimeout(resolve, 50))
+      }
+    }
+
+    // 设置操作状态
+    this.operationStatus[appId] = 'unloading'
+
     const appInfo = this.loadedApps[appId]
     
     if (!appInfo) {
       console.warn(`[MicroAppManager] App not found: ${appId}`)
+      delete this.operationStatus[appId]
       return
     }
 
@@ -273,6 +309,9 @@ class MicroAppManager {
       }
       this._cleanupStyles(appId)
       delete this.loadedApps[appId]
+    } finally {
+      // 清除操作状态
+      delete this.operationStatus[appId]
     }
   }
 
