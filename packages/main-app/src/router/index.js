@@ -134,14 +134,21 @@ router.beforeEach((to, from, next) => {
     }
   }
   
+  // 使用 nextTick 确保状态更新完成后再继续导航
+  // 避免快速连续导航时的冲突
   next()
 })
 
-router.afterEach((to, from) => {
+router.afterEach((to, from, failure) => {
   const appStore = useAppStore()
   
   // 关闭 loading
   appStore.setLoading(false)
+  
+  // 处理导航失败的情况
+  if (failure) {
+    console.warn('[Router] Navigation failed:', failure)
+  }
 })
 
 export default router

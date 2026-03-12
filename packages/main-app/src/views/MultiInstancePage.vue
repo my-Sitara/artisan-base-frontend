@@ -454,9 +454,16 @@ async function loadApp(panel) {
       }
     } else {
       // 处理与单独页面的冲突：先卸载已加载的实例
+      // 注意：只在确实需要时才卸载，避免频繁的导航取消
       if (microAppManager.isAppLoaded(panel.appId)) {
         console.log(`[MultiApp] App ${panel.appId} already loaded, unloading first`)
-        await microAppManager.unload(panel.appId)
+        // 使用 Promise.race 防止卸载过程卡住
+        await Promise.race([
+          microAppManager.unload(panel.appId),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Unload timeout')), 3000)
+          )
+        ])
       }
       // 加载应用到当前面板
       await microAppManager.load(panel.appId, container, {
@@ -466,7 +473,7 @@ async function loadApp(panel) {
     panel.loaded = true
   } catch (error) {
     console.error(`[MultiApp] Failed to load ${panel.appId}:`, error)
-    ElMessage.error(`加载应用失败: ${error.message}`)
+    ElMessage.error(`加载应用失败：${error.message}`)
   }
 }
 
@@ -562,12 +569,14 @@ async function restoreLayout() {
     splitWidths.value = data.splitWidths || ['50%', '50%']
     activeTabId.value = data.activeTabId || ''
     
+    // 先收集所有需要加载的应用
+    const panelsToLoad = []
     for (const saved of data.panels) {
       const appConfig = getMicroApp(saved.appId)
       if (!appConfig || appConfig.status !== 'online') continue
       
       const panelId = `panel-${++panelCounter}-${Date.now()}`
-      appPanels.value.push({
+      const panel = {
         id: panelId,
         appId: saved.appId,
         name: saved.name || appConfig.name,
@@ -578,17 +587,32 @@ async function restoreLayout() {
         y: saved.y || 20,
         width: saved.width || 500,
         height: saved.height || 400
-      })
+      }
+      appPanels.value.push(panel)
+      panelsToLoad.push(panel)
     }
     
     if (appPanels.value.length > 0 && !activeTabId.value) {
       activeTabId.value = appPanels.value[0].id
     }
     
+    // 等待 DOM 渲染完成
     await nextTick()
-    for (const panel of appPanels.value) {
-      await loadApp(panel)
-    }
+    
+    // 延迟加载应用，等待路由稳定
+    // 这样可以避免与路由守卫的 setLoading 冲突
+    setTimeout(async () => {
+      // 串行加载应用，避免并发导航冲突
+      for (const panel of panelsToLoad) {
+        try {
+          await loadApp(panel)
+          // 每个应用之间间隔一小段时间，避免导航冲突
+          await new Promise(resolve => setTimeout(resolve, 100))
+        } catch (err) {
+          console.warn(`[MultiApp] Failed to load panel ${panel.id}:`, err)
+        }
+      }
+    }, 300)
   } catch (e) {
     console.warn('[MultiApp] Failed to restore layout:', e)
   }

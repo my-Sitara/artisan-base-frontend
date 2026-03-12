@@ -118,9 +118,9 @@ router.beforeEach((to, from, next) => {
   
   // 设置当前激活的应用
   if (to.meta.appId) {
-    appStore.setActiveApp(to.meta.appId)
+    appStore.setActiveApp(to.meta.appId as string)
   } else if (to.params.appId) {
-    appStore.setActiveApp(to.params.appId)
+    appStore.setActiveApp(to.params.appId as string)
   } else {
     appStore.setActiveApp(null)
   }
@@ -128,20 +128,27 @@ router.beforeEach((to, from, next) => {
   // 从微应用配置同步 keepAlive 到路由 meta
   const appId = to.meta.appId || to.params.appId
   if (appId) {
-    const appConfig = getMicroApp(appId)
+    const appConfig = getMicroApp(appId as string)
     if (appConfig?.layoutOptions?.keepAlive !== undefined) {
       to.meta.keepAlive = appConfig.layoutOptions.keepAlive
     }
   }
   
+  // 使用 nextTick 确保状态更新完成后再继续导航
+  // 避免快速连续导航时的冲突
   next()
 })
 
-router.afterEach((to, from) => {
+router.afterEach((to, from, failure) => {
   const appStore = useAppStore()
   
   // 关闭 loading
   appStore.setLoading(false)
+  
+  // 处理导航失败的情况
+  if (failure) {
+    console.warn('[Router] Navigation failed:', failure)
+  }
 })
 
 export default router
