@@ -21,7 +21,17 @@
       </template>
       
       <el-table :data="apps" style="width: 100%;" row-key="id">
-        <el-table-column prop="id" label="应用ID" width="150" />
+        <el-table-column prop="icon" label="图标" width="80">
+          <template #default="{ row }">
+            <div class="app-icon-display">
+              <img v-if="row.icon && isImageIcon(row.icon)" :src="row.icon" alt="图标" style="max-width: 32px; max-height: 32px;" />
+              <span v-else-if="row.icon && isSvgString(row.icon)" v-html="row.icon" style="font-size: 24px;"></span>
+              <span v-else-if="row.icon && row.iconType === 'emoji'">{{ row.icon }}</span>
+              <el-icon v-else size="20"><Monitor /></el-icon>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="id" label="应用 ID" width="150" />
         <el-table-column prop="name" label="应用名称" width="120" />
         <el-table-column prop="type" label="类型" width="100">
           <template #default="{ row }">
@@ -169,6 +179,41 @@
         </el-form-item>
         <el-form-item label="预加载">
           <el-switch v-model="editForm.preload" />
+        </el-form-item>
+        <el-form-item label="应用图标">
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <div style="flex: 1;">
+              <el-input 
+                v-model="editForm.icon" 
+                placeholder="支持 URL、本地路径、Base64、SVG 字符串" 
+                type="textarea"
+                :rows="2"
+              />
+              <div style="margin-top: 8px; font-size: 12px; color: #999;">
+                支持格式：网络图片 URL、本地图片地址、Base64 编码、SVG 字符串
+              </div>
+            </div>
+            <div style="width: 100px; text-align: center;">
+              <div v-if="editForm.icon" class="icon-preview">
+                <img v-if="isImageIcon(editForm.icon)" :src="editForm.icon" alt="图标预览" style="max-width: 48px; max-height: 48px;" />
+                <span v-else-if="isSvgString(editForm.icon)" v-html="editForm.icon" style="font-size: 24px;"></span>
+                <span v-else>{{ editForm.icon.charAt(0) }}</span>
+              </div>
+              <div v-else class="icon-preview-placeholder">
+                <el-icon size="24"><Monitor /></el-icon>
+              </div>
+            </div>
+          </div>
+        </el-form-item>
+        <el-form-item label="图标类型">
+          <el-select v-model="editForm.iconType" style="width: 100%;">
+            <el-option label="图片 (image)" value="image" />
+            <el-option label="SVG (svg)" value="svg" />
+            <el-option label="表情符号 (emoji)" value="emoji" />
+          </el-select>
+          <div style="margin-top: 8px; font-size: 12px; color: #999;">
+            图标类型用于主应用正确解析和渲染图标
+          </div>
         </el-form-item>
 
         <el-divider content-position="left">布局配置</el-divider>
@@ -398,6 +443,19 @@ function showEditApp(app) {
   showEditDialog.value = true
 }
 
+// 判断是否为图片 URL 或 Base64
+function isImageIcon(icon) {
+  if (!icon) return false
+  // 检查是否为 http/https 开头的 URL 或 data:image 开头的 Base64
+  return /^https?:\/\//.test(icon) || /^data:image\//.test(icon) || /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(icon)
+}
+
+// 判断是否为 SVG 字符串
+function isSvgString(icon) {
+  if (!icon) return false
+  return icon.trim().startsWith('<svg')
+}
+
 function handleSaveEdit() {
   if (!editForm.value) return
   
@@ -412,7 +470,9 @@ function handleSaveEdit() {
     layoutOptions: { ...layoutOptions.value },
     props: {
       routerBase: editForm.value.routerBase
-    }
+    },
+    icon: editForm.value.icon || '',
+    iconType: editForm.value.iconType || 'image'
   }
   
   if (!isEditMode.value) {
@@ -622,7 +682,9 @@ function showAddApp() {
       showFooter: false,
       keepAlive: false
     },
-    routerBase: ''
+    routerBase: '',
+    icon: '',
+    iconType: 'image'
   }
   
   // 初始化布局选项
@@ -715,5 +777,37 @@ onMounted(() => {
   border-radius: 4px;
   overflow: hidden;
   background: #f5f7fa;
+}
+
+/* 应用图标显示样式 */
+.app-icon-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+/* 图标预览样式 */
+.icon-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  background-color: #f5f7fa;
+}
+
+.icon-preview-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 4px;
+  color: #999;
 }
 </style>

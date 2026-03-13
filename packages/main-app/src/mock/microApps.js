@@ -21,6 +21,8 @@ export default {
         lastModified: Date.now(),
         preload: true,
         type: 'vue3',
+        icon: 'Monitor',
+        iconType: 'element-icon',
         layoutType: 'default',
         layoutOptions: {
           showHeader: true,
@@ -43,6 +45,8 @@ export default {
         lastModified: Date.now(),
         preload: true,
         type: 'vue2',
+        icon: 'Platform',
+        iconType: 'element-icon',
         layoutType: 'default',
         layoutOptions: {
           showHeader: true,
@@ -65,6 +69,8 @@ export default {
         lastModified: Date.now(),
         preload: false,
         type: 'iframe',
+        icon: 'Grid',
+        iconType: 'element-icon',
         layoutType: 'embedded',
         layoutOptions: {
           showHeader: true,
@@ -87,6 +93,8 @@ export default {
         lastModified: Date.now(),
         preload: false,
         type: 'link',
+        icon: 'Link',
+        iconType: 'element-icon',
         layoutType: 'blank',
         layoutOptions: {
           showHeader: false,
@@ -95,6 +103,80 @@ export default {
           showFooter: false
         },
         props: {}
+      },
+      {
+        id: 'svg-demo-app',
+        name: 'SVG 图标示例',
+        entry: 'http://localhost:8080',
+        activeRule: '/svg-demo',
+        container: '#micro-app-container',
+        status: 'online',
+        version: '1.0.0',
+        lastModified: Date.now(),
+        preload: false,
+        type: 'vue3',
+        icon: 'vue-logo',
+        iconType: 'svg',
+        layoutType: 'default',
+        layoutOptions: {
+          showHeader: true,
+          showSidebar: true,
+          keepAlive: false,
+          showFooter: false
+        },
+        props: {
+          routerBase: '/svg-demo'
+        }
+      },
+      {
+        id: 'image-demo-app',
+        name: '图片图标示例',
+        entry: 'http://localhost:9000',
+        activeRule: '/image-demo',
+        container: '#micro-app-container',
+        status: 'online',
+        version: '1.0.0',
+        lastModified: Date.now(),
+        preload: false,
+        type: 'vue3',
+        icon: 'https://picsum.photos/seed/icondemo/48/48',
+        iconUrl: 'https://picsum.photos/seed/icondemo/48/48',
+        imageFormat: 'JPEG',
+        iconType: 'image',
+        layoutType: 'default',
+        layoutOptions: {
+          showHeader: true,
+          showSidebar: true,
+          keepAlive: false,
+          showFooter: false
+        },
+        props: {
+          routerBase: '/image-demo'
+        }
+      },
+      {
+        id: 'emoji-demo-app',
+        name: 'Emoji 图标示例',
+        entry: 'http://localhost:9001',
+        activeRule: '/emoji-demo',
+        container: '#micro-app-container',
+        status: 'online',
+        version: '1.0.0',
+        lastModified: Date.now(),
+        preload: false,
+        type: 'vue3',
+        icon: '🚀',
+        iconType: 'emoji',
+        layoutType: 'default',
+        layoutOptions: {
+          showHeader: true,
+          showSidebar: true,
+          keepAlive: false,
+          showFooter: false
+        },
+        props: {
+          routerBase: '/emoji-demo'
+        }
       }
     ]
   }

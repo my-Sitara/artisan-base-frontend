@@ -93,7 +93,18 @@
               class="quick-nav-item"
               @click="goToApp(app.id)"
             >
-              <el-icon :size="24"><Monitor /></el-icon>
+              <!-- Element Plus Icon -->
+              <el-icon v-if="app.iconType === 'element-icon'" :size="24">
+                <component :is="app.icon" />
+              </el-icon>
+              <!-- SVG Icon -->
+              <div v-else-if="app.iconType === 'svg'" class="nav-svg-icon" v-html="getSvgContent(app.icon)" />
+              <!-- Emoji -->
+              <span v-else-if="app.iconType === 'emoji'" class="nav-emoji">{{ app.icon }}</span>
+              <!-- 图片 URL -->
+              <img v-else-if="app.iconType === 'image'" :src="app.icon" alt="icon" class="nav-icon-image" />
+              <!-- 默认图标 -->
+              <el-icon v-else :size="24"><Monitor /></el-icon>
               <span>{{ app.name }}</span>
             </div>
             
@@ -141,6 +152,7 @@ import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { bridge } from '@/core/bridge'
+import { getSvgContent } from '@/config/svgIcons'
 import {
   Grid,
   CircleCheck,
@@ -251,6 +263,35 @@ function syncTokenToAll() {
       
       &:hover {
         background-color: #f0f2f5;
+      }
+      
+      // Emoji 图标样式
+      .nav-emoji {
+        font-size: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      // SVG 图标样式
+      .nav-svg-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        :deep(svg) {
+          width: 100%;
+          height: 100%;
+        }
+      }
+      
+      // 图片图标样式
+      .nav-icon-image {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
       }
     }
   }

@@ -21,7 +21,25 @@
       </template>
       
       <el-table :data="apps" style="width: 100%;" row-key="id">
-        <el-table-column prop="id" label="应用ID" width="150" />
+        <el-table-column prop="icon" label="图标" width="80">
+          <template #default="{ row }">
+            <div class="app-icon-display">
+              <!-- Element Plus Icon -->
+              <el-icon v-if="row.iconType === 'element-icon'" :size="20">
+                <component :is="row.icon" />
+              </el-icon>
+              <!-- SVG Icon -->
+              <div v-else-if="row.iconType === 'svg'" class="table-svg-icon" v-html="getSvgContent(row.icon)" />
+              <!-- Emoji -->
+              <span v-else-if="row.iconType === 'emoji'" class="table-emoji">{{ row.icon }}</span>
+              <!-- 图片 URL -->
+              <img v-else-if="row.iconType === 'image'" :src="row.iconUrl || row.icon" alt="icon" class="table-icon-image" />
+              <!-- 默认图标 -->
+              <el-icon v-else size="20"><Monitor /></el-icon>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="id" label="应用 ID" width="150" />
         <el-table-column prop="name" label="应用名称" width="120" />
         <el-table-column prop="type" label="类型" width="100">
           <template #default="{ row }">
@@ -142,6 +160,8 @@
         :model="editForm" 
         label-width="100px"
         label-position="right"
+        ref="editFormRef"
+        :rules="formRules"
       >
         <el-divider content-position="left">基本信息</el-divider>
         <el-form-item label="应用ID">
@@ -169,6 +189,37 @@
         </el-form-item>
         <el-form-item label="预加载">
           <el-switch v-model="editForm.preload" />
+        </el-form-item>
+        <el-form-item label="应用图标" prop="icon">
+          <IconSelector 
+            v-model="editForm.icon" 
+            :icon-type="editForm.iconType"
+            @update:icon-type="editForm.iconType = $event"
+            @update:image-format="editForm.imageFormat = $event"
+          />
+          <div style="margin-top: 8px; font-size: 12px; color: #999;">
+            从图标库选择或自定义输入 URL、Base64、SVG、Emoji（必填）
+          </div>
+        </el-form-item>
+        <el-form-item label="图标类型" prop="iconType">
+          <el-input v-model="editForm.iconType" disabled style="width: 100%;" />
+          <div style="margin-top: 8px; font-size: 12px; color: #999;">
+            图标类型由选择的图标自动确定（必填）
+          </div>
+        </el-form-item>
+        <!-- ✅ 图片地址字段（仅远程图片类型显示） -->
+        <el-form-item v-if="editForm.iconType === 'image'" label="图片地址" prop="iconUrl">
+          <el-input v-model="editForm.icon" disabled style="width: 100%;" placeholder="图片 URL 地址" />
+          <div style="margin-top: 8px; font-size: 12px; color: #999;">
+            选择的图片完整地址
+          </div>
+        </el-form-item>
+        <!-- ✅ 图片类型字段（仅远程图片类型显示） -->
+        <el-form-item v-if="editForm.iconType === 'image'" label="图片格式" prop="imageFormat">
+          <el-input v-model="editForm.imageFormat" disabled style="width: 100%;" />
+          <div style="margin-top: 8px; font-size: 12px; color: #999;">
+            图片格式由选择的图片自动确定（如：JPEG, PNG, SVG 等）
+          </div>
         </el-form-item>
 
         <el-divider content-position="left">布局配置</el-divider>
@@ -260,7 +311,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showEditDialog = false">取消</el-button>
+        <el-button @click="handleCancelEdit">取消</el-button>
         <el-button type="primary" @click="handleSaveEdit">保存</el-button>
       </template>
     </el-dialog>
@@ -305,6 +356,8 @@ import {
   getLayoutDescription,
   getLayoutAlertType
 } from '@/components/layout/LayoutPreview.js'
+import IconSelector from '@/components/IconSelector.vue'
+import { getSvgContent } from '@/config/svgIcons'
 
 const router = useRouter()
 const route = useRoute()
@@ -318,6 +371,7 @@ const showDetailDialog = ref(false)
 const currentApp = ref(null)
 const showEditDialog = ref(false)
 const isEditMode = ref(false)  // 标记是否为编辑模式
+const editFormRef = ref(null)  // 表单引用
 const editForm = ref(null)
 const layoutOptions = ref({
   showHeader: true,
@@ -332,6 +386,16 @@ const previewLayoutType = ref('default')
 const currentPreviewComponent = computed(() => {
   return LayoutPreviewComponents[previewLayoutType.value] || LayoutPreviewComponents.default
 })
+
+// 表单验证规则
+const formRules = {
+  icon: [
+    { required: true, message: '请选择或输入应用图标', trigger: 'change' }
+  ],
+  iconType: [
+    { required: true, message: '图标类型不能为空', trigger: 'change' }
+  ]
+}
 
 // 监听布局选项变化
 watch(layoutOptions, (newVal) => {
@@ -395,11 +459,59 @@ function showEditApp(app) {
     showFooter: app.layoutOptions?.showFooter ?? false,
     keepAlive: app.layoutOptions?.keepAlive ?? false
   }
+  
+  // 确保 icon、iconType 和 imageFormat 有值（兼容旧数据）
+  if (!editForm.value.icon) {
+    // 根据应用类型设置默认图标
+    const defaultIcons = {
+      vue3: 'Monitor',
+      vue2: 'Platform',
+      iframe: 'Grid',
+      link: 'Link'
+    }
+    editForm.value.icon = defaultIcons[app.type] || 'Monitor'
+    editForm.value.iconType = 'element-icon'
+    editForm.value.imageFormat = ''  // ✅ 非图片类型为空
+  }
+  
+  // ✅ 如果是图片类型，确保 imageFormat 有值
+  if (editForm.value.iconType === 'image' && !editForm.value.imageFormat) {
+    editForm.value.imageFormat = app.imageFormat || 'JPEG'  // 默认 JPEG
+  }
+  
+  // 重置表单验证状态
+  if (editFormRef.value) {
+    editFormRef.value.clearValidate()
+  }
+  
   showEditDialog.value = true
 }
 
-function handleSaveEdit() {
+// 判断是否为图片 URL 或 Base64
+function isImageIcon(icon) {
+  if (!icon) return false
+  // 检查是否为 http/https 开头的 URL 或 data:image 开头的 Base64
+  return /^https?:\/\//.test(icon) || /^data:image\//.test(icon) || /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(icon)
+}
+
+// 判断是否为 SVG 字符串
+function isSvgString(icon) {
+  if (!icon) return false
+  return icon.trim().startsWith('<svg')
+}
+
+async function handleSaveEdit() {
   if (!editForm.value) return
+  
+  // 表单验证
+  if (!editFormRef.value) return
+  
+  try {
+    await editFormRef.value.validate()
+  } catch (error) {
+    ElMessage.error('请填写必填项')
+    return
+  }
   
   const config = {
     name: editForm.value.name,
@@ -412,7 +524,11 @@ function handleSaveEdit() {
     layoutOptions: { ...layoutOptions.value },
     props: {
       routerBase: editForm.value.routerBase
-    }
+    },
+    icon: editForm.value.icon,
+    iconUrl: editForm.value.icon,
+    imageFormat: editForm.value.imageFormat,  // ✅ 新增
+    iconType: editForm.value.iconType
   }
   
   if (!isEditMode.value) {
@@ -606,6 +722,14 @@ function handleDeleteApp(app) {
   })
 }
 
+// 取消编辑并重置表单
+function handleCancelEdit() {
+  if (editFormRef.value) {
+    editFormRef.value.resetFields()
+  }
+  showEditDialog.value = false
+}
+
 function showAddApp() {
   editForm.value = {
     id: '',
@@ -622,11 +746,19 @@ function showAddApp() {
       showFooter: false,
       keepAlive: false
     },
-    routerBase: ''
+    routerBase: '',
+    // 默认图标配置
+    icon: 'Monitor',
+    iconType: 'element-icon'
   }
   
   // 初始化布局选项
   layoutOptions.value = { ...editForm.value.layoutOptions }
+  
+  // 重置表单验证状态
+  if (editFormRef.value) {
+    editFormRef.value.clearValidate()
+  }
   
   showEditDialog.value = true
 }
@@ -715,5 +847,66 @@ onMounted(() => {
   border-radius: 4px;
   overflow: hidden;
   background: #f5f7fa;
+}
+
+/* 应用图标显示样式 */
+.app-icon-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+/* 表格 Emoji 图标样式 */
+.table-emoji {
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 表格图片图标样式 */
+.table-icon-image {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* 表格 SVG 图标样式 */
+.table-svg-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  :deep(svg) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* 图标预览样式 */
+.icon-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  background-color: #f5f7fa;
+}
+
+.icon-preview-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 4px;
+  color: #999;
 }
 </style>
