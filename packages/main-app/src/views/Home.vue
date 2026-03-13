@@ -70,7 +70,7 @@
                   size="small" 
                   link
                   :disabled="row.status === 'offline'"
-                  @click="goToApp(row.id)"
+                  @click="handleTableAppClick(row)"
                 >
                   访问
                 </el-button>
@@ -91,7 +91,7 @@
               v-for="app in onlineApps" 
               :key="app.id"
               class="quick-nav-item"
-              @click="goToApp(app.id)"
+              @click="handleNavAppClick(app)"
             >
               <!-- Element Plus Icon -->
               <el-icon v-if="app.iconType === 'element-icon'" :size="24">
@@ -181,6 +181,26 @@ function getTypeTagType(type) {
     link: ''
   }
   return typeMap[type] || ''
+}
+
+function handleNavAppClick(app) {
+  // link 类型直接新窗口打开
+  if (app.type === 'link') {
+    window.open(app.entry, '_blank')
+  } else {
+    // 其他类型正常路由跳转
+    router.push(`/app/${app.id}`)
+  }
+}
+
+function handleTableAppClick(app) {
+  // link 类型直接新窗口打开
+  if (app.type === 'link') {
+    window.open(app.entry, '_blank')
+  } else {
+    // 其他类型正常路由跳转
+    router.push(`/app/${app.id}`)
+  }
 }
 
 function goToApp(appId) {

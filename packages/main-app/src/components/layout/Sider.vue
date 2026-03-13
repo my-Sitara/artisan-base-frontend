@@ -36,8 +36,9 @@
         </template>
         <el-menu-item 
           v-for="app in onlineApps" 
-          :key="app.id"
-          :index="`/app/${app.id}`"
+          :key="`app-${app.id}`"
+          :index="app.type === 'link' ? '' : `/app/${app.id}`"
+          @click="handleAppClick(app)"
         >
           <!-- Element Plus Icon -->
           <el-icon v-if="app.iconType === 'element-icon'">
@@ -81,7 +82,7 @@
 <script setup>
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import {
   HomeFilled,
@@ -111,6 +112,7 @@ const emit = defineEmits(['toggle-collapse'])
 
 const route = useRoute()
 const appStore = useAppStore()
+const router = useRouter()
 
 const { sidebarCollapsed, onlineApps } = storeToRefs(appStore)
 
@@ -118,6 +120,16 @@ const sidebarWidth = computed(() => props.collapsed ? '64px' : '220px')
 
 function toggleCollapse() {
   emit('toggle-collapse')
+}
+
+function handleAppClick(app) {
+  // link 类型：只打开新窗口，不路由跳转
+  if (app.type === 'link') {
+    window.open(app.entry, '_blank')
+  } else {
+    // 其他类型：正常路由跳转
+    router.push(`/app/${app.id}`)
+  }
 }
 
 function getAppIcon(type) {
