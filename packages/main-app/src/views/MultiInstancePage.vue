@@ -251,11 +251,14 @@ const dragState = reactive({
   startHeight: 0
 })
 
-// 面板ID计数器
+// 面板 ID 计数器
 let panelCounter = 0
 
-// 可用应用列表
-const { onlineApps: availableApps } = storeToRefs(appStore)
+// 可用应用列表（排除 link 类型，因为 link 类型无法嵌入容器）
+const availableApps = computed(() => {
+  const { onlineApps } = storeToRefs(appStore)
+  return onlineApps.value.filter(app => app.type !== 'link')
+})
 
 // 网格列数
 const gridSpan = computed(() => {
