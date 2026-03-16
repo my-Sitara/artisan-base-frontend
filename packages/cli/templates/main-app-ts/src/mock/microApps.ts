@@ -21,8 +21,8 @@ export default {
         lastModified: Date.now(),
         preload: true,
         type: 'vue3',
-        icon: '',
-        iconType: 'image',
+        icon: 'Monitor',
+        iconType: 'element-icon',
         layoutType: 'default',
         layoutOptions: {
           showHeader: true,
@@ -45,8 +45,8 @@ export default {
         lastModified: Date.now(),
         preload: true,
         type: 'vue2',
-        icon: '',
-        iconType: 'image',
+        icon: 'Platform',
+        iconType: 'element-icon',
         layoutType: 'default',
         layoutOptions: {
           showHeader: true,
@@ -69,8 +69,8 @@ export default {
         lastModified: Date.now(),
         preload: false,
         type: 'iframe',
-        icon: '',
-        iconType: 'image',
+        icon: 'Grid',
+        iconType: 'element-icon',
         layoutType: 'embedded',
         layoutOptions: {
           showHeader: true,
@@ -93,8 +93,8 @@ export default {
         lastModified: Date.now(),
         preload: false,
         type: 'link',
-        icon: '',
-        iconType: 'image',
+        icon: 'Link',
+        iconType: 'element-icon',
         layoutType: 'blank',
         layoutOptions: {
           showHeader: false,

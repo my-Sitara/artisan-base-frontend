@@ -109,6 +109,7 @@ onMounted(() => {
 // 在 unmount 时找不到有效的 vnode（已为 null），导致报错
 onBeforeUnmount(async () => {
   // 无条件卸载应用，确保页面切换时实例被完全清理
+  // microAppManager.unload() 内部会处理 operationStatus，防止并发冲突
   if (microAppManager.isAppLoaded(props.appId)) {
     await unloadApp()
   }

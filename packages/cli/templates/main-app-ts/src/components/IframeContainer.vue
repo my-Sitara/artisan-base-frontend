@@ -110,14 +110,17 @@ defineExpose({
 .iframe-container {
   width: 100%;
   height: 100%;
-  min-height: 400px;
+  min-height: 100vh;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .loading-wrapper,
 .error-wrapper {
   width: 100%;
   height: 100%;
+  min-height: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -127,5 +130,16 @@ defineExpose({
 .iframe-wrapper {
   width: 100%;
   height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.iframe-wrapper :deep(iframe) {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  border: none;
+  display: block;
 }
 </style>

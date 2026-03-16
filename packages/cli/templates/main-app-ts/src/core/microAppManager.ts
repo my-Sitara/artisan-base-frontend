@@ -10,8 +10,11 @@ import { bridge } from './bridge'
  */
 class MicroAppManager {
   constructor() {
-    // 存储所有运行中的应用 { appId: { app, config, status, loadTime, errors } }
+    // 存储所有运行中的应用 { appId: { app, config, status, loadTime, errors, container } }
     this.loadedApps = reactive({})
+    
+    // 操作状态：防止并发操作冲突
+    this.operationStatus = {}
     
     // 心跳检测定时器
     this.heartbeatTimers = {}

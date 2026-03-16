@@ -57,6 +57,7 @@ class IframeLoader {
       height: autoHeight ? '400px' : '100%',
       border: 'none',
       display: 'block',
+      flex: '1',
       ...style
     })
 

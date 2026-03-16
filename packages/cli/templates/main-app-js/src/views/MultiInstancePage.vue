@@ -100,6 +100,7 @@
         type="card" 
         closable 
         @tab-remove="removeApp"
+        @tab-click="handleTabClick"
       >
         <el-tab-pane
           v-for="app in appPanels"
@@ -369,10 +370,16 @@ function startSplitResize(event) {
 async function handleAddApp() {
   if (!addForm.appId) return
   
-  // 防止重复添加同一应用
-  const alreadyAdded = appPanels.value.some(p => p.appId === addForm.appId)
-  if (alreadyAdded) {
-    ElMessage.warning('该应用已在同屏中，无法重复添加')
+  // 智能展示一页：防止重复添加同一应用
+  const existingPanel = appPanels.value.find(p => p.appId === addForm.appId)
+  if (existingPanel) {
+    // 如果已存在，激活该面板并刷新
+    if (layoutMode.value === 'tabs') {
+      activeTabId.value = existingPanel.id
+    }
+    await refreshApp(existingPanel.id)
+    ElMessage.info('该应用已在同屏中，已为您激活并刷新')
+    showAddDialog.value = false
     return
   }
   
@@ -420,15 +427,36 @@ async function loadApp(panel) {
   
   try {
     if (appConfig.type === 'iframe') {
-      iframeLoader.load({
-        id: panel.id,
-        src: appConfig.entry + (panel.subPath ? `/#${panel.subPath}` : ''),
-        container: container,
-        autoHeight: false,
-        style: { height: '100%' }
-      })
+      // 先检查是否已加载
+      const existingIframe = iframeLoader.get(panel.id)
+      if (existingIframe) {
+        // 如果已加载，只更新大小和容器
+        const iframe = container.querySelector('iframe')
+        if (iframe) {
+          iframe.style.width = '100%'
+          iframe.style.height = '100%'
+        } else {
+          // 如果容器中没有 iframe，重新加载
+          iframeLoader.load({
+            id: panel.id,
+            src: appConfig.entry + (panel.subPath ? `/#${panel.subPath}` : ''),
+            container: container,
+            autoHeight: false,
+            style: { height: '100%' }
+          })
+        }
+      } else {
+        // 否则重新加载
+        iframeLoader.load({
+          id: panel.id,
+          src: appConfig.entry + (panel.subPath ? `/#${panel.subPath}` : ''),
+          container: container,
+          autoHeight: false,
+          style: { height: '100%' }
+        })
+      }
     } else {
-      // 如果应用已被其他页面加载，先卸载
+      // 处理与单独页面的冲突：先卸载已加载的实例
       // 注意：只在确实需要时才卸载，避免频繁的导航取消
       if (microAppManager.isAppLoaded(panel.appId)) {
         console.log(`[MultiApp] App ${panel.appId} already loaded, unloading first`)
@@ -440,6 +468,7 @@ async function loadApp(panel) {
           )
         ])
       }
+      // 加载应用到当前面板
       await microAppManager.load(panel.appId, container, {
         props: { subPath: panel.subPath }
       })
@@ -447,6 +476,7 @@ async function loadApp(panel) {
     panel.loaded = true
   } catch (error) {
     console.error(`[MultiApp] Failed to load ${panel.appId}:`, error)
+    ElMessage.error(`加载应用失败：${error.message}`)
   }
 }
 
@@ -467,6 +497,18 @@ async function refreshApp(panelId) {
     panel.loaded = false
     await nextTick()
     await loadApp(panel)
+  }
+}
+
+// 标签点击事件处理
+async function handleTabClick(tab) {
+  const panelId = tab.props.name
+  const panel = appPanels.value.find(p => p.id === panelId)
+  if (panel) {
+    const container = document.getElementById(`app-container-${panel.id}`)
+    if (container) {
+      await loadApp(panel)
+    }
   }
 }
 
@@ -580,8 +622,31 @@ async function restoreLayout() {
 }
 
 // 监听布局模式变化
-watch(layoutMode, () => {
+watch(layoutMode, (newMode, oldMode) => {
   saveLayout()
+  
+  // 布局切换时，DOM 结构会重新创建，需要重新加载应用
+  nextTick(async () => {
+    // 切换到标签页布局时，确保有激活的标签
+    if (newMode === 'tabs' && appPanels.value.length > 0) {
+      if (!activeTabId.value || !appPanels.value.some(p => p.id === activeTabId.value)) {
+        activeTabId.value = appPanels.value[0].id
+      }
+    }
+    
+    // 重新加载所有应用到新的容器中
+    for (const panel of appPanels.value) {
+      // 对于标签页布局，只加载当前激活标签的应用
+      if (newMode === 'tabs' && panel.id !== activeTabId.value) {
+        continue
+      }
+      
+      const container = document.getElementById(`app-container-${panel.id}`)
+      if (container) {
+        await loadApp(panel)
+      }
+    }
+  })
 })
 
 onMounted(() => {

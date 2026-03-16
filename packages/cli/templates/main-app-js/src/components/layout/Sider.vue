@@ -40,9 +40,18 @@
           :index="app.type === 'link' ? '' : `/app/${app.id}`"
           @click="handleAppClick(app)"
         >
-          <el-icon>
-            <component :is="getAppIcon(app.type)" />
+          <!-- Element Plus Icon -->
+          <el-icon v-if="app.iconType === 'element-icon'">
+            <component :is="app.icon" />
           </el-icon>
+          <!-- SVG Icon -->
+          <div v-else-if="app.iconType === 'svg'" class="menu-svg-icon" v-html="getSvgContent(app.icon)" />
+          <!-- Emoji -->
+          <span v-else-if="app.iconType === 'emoji'" class="menu-emoji">{{ app.icon }}</span>
+          <!-- 图片 URL -->
+          <img v-else-if="app.iconType === 'image'" :src="app.iconUrl || app.icon" alt="icon" class="menu-icon-image" />
+          <!-- 默认图标 -->
+          <el-icon v-else><Monitor /></el-icon>
           <template #title>{{ app.name }}</template>
         </el-menu-item>
       </el-sub-menu>
@@ -86,6 +95,7 @@ import {
   Fold,
   Expand
 } from '@element-plus/icons-vue'
+import { getSvgContent } from '@/config/svgIcons'
 
 const props = defineProps({
   collapsed: {
@@ -173,6 +183,35 @@ function getAppIcon(type) {
     &:not(.el-menu--collapse) {
       width: 220px;
     }
+  }
+}
+
+// 菜单 Emoji 图标样式
+.menu-emoji {
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// 菜单图片图标样式
+.menu-icon-image {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+// 菜单 SVG 图标样式
+.menu-svg-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  :deep(svg) {
+    width: 100%;
+    height: 100%;
   }
 }
 </style>
