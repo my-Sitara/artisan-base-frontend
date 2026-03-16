@@ -190,8 +190,8 @@ function selectIcon(icon) {
   selectedIconId.value = icon.id
   selectedIcon.value = icon
   
-  // ✅ 根据选择的图标类型自动更新 iconType
-  updateIconTypeBySelection(icon)
+  // ✅ 只在对话框内部更新预览状态，不立即 emit 到父组件
+  // 等待用户点击"确定"按钮时才更新外部值
 }
 
 // 根据选择更新图标类型
