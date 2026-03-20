@@ -1,0 +1,445 @@
+# Artisan 微前端平台 - 快速上手指南
+
+> 🎯 一本就懂！从零开始掌握微前端开发
+
+## 📖 目录
+
+1. [5 分钟快速体验](#-5-分钟快速体验)
+2. [项目结构一目了然](#-项目结构一目了然)
+3. [核心概念通俗理解](#-核心概念通俗理解)
+4. [实战：创建你的第一个子应用](#-实战创建你的第一个子应用)
+5. [常用开发场景](#-常用开发场景)
+6. [故障排查速查表](#-故障排查速查表)
+
+---
+
+## 🚀 5 分钟快速体验
+
+### 第一步：安装依赖
+
+```bash
+# 克隆项目（如果你还没有）
+git clone https://github.com/your-org/artisan-base-frontend.git
+cd artisan-base-frontend
+
+# 安装所有依赖
+npm install
+```
+
+### 第二步：启动开发环境
+
+**推荐新手方式（使用本地 mock 数据）：**
+
+```bash
+npm run dev:all:mock
+```
+
+这个命令会同时启动：
+- 🟦 主应用（端口 8080）
+- 🟩 Vue3 子应用（端口 7080）
+- 🟨 Vue2 子应用（端口 3000）
+- 🟪 iframe 子应用（端口 9080）
+
+### 第三步：访问应用
+
+打开浏览器访问：**http://localhost:8080**
+
+你会看到：
+- 首页展示所有可用的子应用
+- 点击卡片即可进入对应的子应用
+- 尝试访问 `/vue3`、`/vue2`、`/iframe` 路由
+
+---
+
+## 📁 项目结构一目了然
+
+```
+artisan-base-frontend/
+│
+├── packages/                      # 所有应用代码都在这里
+│   ├── main-app/                 # 🏠 主应用（大管家）
+│   │   ├── src/
+│   │   │   ├── core/            # 核心功能
+│   │   │   │   ├── microAppManager.js  # 微应用管理器
+│   │   │   │   └── bridge.js           # 跨应用通信桥
+│   │   │   ├── config/          # 配置文件
+│   │   │   │   └── microApps.js # 微应用配置列表
+│   │   │   ├── router/          # 路由配置
+│   │   │   └── views/           # 页面组件
+│   │   └── package.json
+│   │
+│   ├── vue3-sub-app/           # 🟩 Vue3 示例子应用
+│   ├── vue2-sub-app/           # 🟨 Vue2 示例子应用
+│   ├── iframe-sub-app/         # 🟪 iframe 示例子应用
+│   └── cli/                    # 🔧 脚手架工具
+│
+├── user-docs/                   # 📚 详细文档
+└── package.json                 # 根配置
+```
+
+---
+
+## 💡 核心概念通俗理解
+
+### 1. 什么是微前端？
+
+想象一个大型商场（主应用），里面有多个独立店铺（子应用）：
+- 每个店铺可以独立装修（技术栈）
+- 顾客可以在店铺间自由穿梭（路由跳转）
+- 商场统一管理收银和安保（主应用管理）
+
+### 2. 四大核心组件
+
+| 组件 | 作用 | 类比 |
+|------|------|------|
+| **MicroAppManager** | 管理子应用生命周期 | 商场物业经理 |
+| **Bridge** | 跨应用通信 | 店铺间的内部电话 |
+| **微应用配置** | 定义子应用信息 | 店铺租赁合同 |
+| **布局系统** | 控制页面展示 | 商场空间规划 |
+
+### 3. 子应用的四种类型
+
+```javascript
+{
+  id: 'my-app',
+  type: 'vue3',      // 或 'vue2', 'iframe', 'link'
+  entry: 'http://localhost:7080',
+  activeRule: '/my-app'
+}
+```
+
+- **vue3**: 基于 Vue 3 的子应用（推荐）
+- **vue2**: 基于 Vue 2 的子应用（兼容老项目）
+- **iframe**: 通过 iframe 嵌入的独立应用
+- **link**: 外链应用（新窗口打开）
+
+### 4. 布局类型
+
+| 布局类型 | 显示效果 | 使用场景 |
+|---------|---------|---------|
+| `default` | 有顶部 + 侧边栏 | 常规管理页面 |
+| `full` | 全屏无导航 | 数据大屏、编辑器 |
+| `embedded` | 至少有一个导航 | 需要部分导航的场景 |
+| `blank` | 完全空白 | 自定义布局 |
+
+---
+
+## 🛠️ 实战：创建你的第一个子应用
+
+### 方法一：使用 CLI（推荐）
+
+```bash
+# 1. 全局安装 CLI 工具
+cd packages/cli
+npm link
+
+# 2. 回到项目根目录
+cd ../..
+
+# 3. 创建 Vue3 子应用
+artisan create sub-app my-first-app --type vue3
+
+# 4. 启动你的子应用
+npm run dev:my-first-app
+```
+
+CLI 会自动帮你：
+- ✅ 创建完整的项目结构
+- ✅ 配置好 Vite + qiankun
+- ✅ 生成示例代码
+- ✅ 配置端口和路由
+
+### 方法二：手动复制模板
+
+```bash
+# 复制 Vue3 模板
+cp -r packages/cli/templates/vue3-sub-app-js/packages/my-first-app
+
+# 修改配置
+# 1. 修改 my-first-app/package.json 中的名称
+# 2. 修改 my-first-app/vite.config.js 中的端口
+# 3. 在主应用中注册新应用（见下文）
+```
+
+### 在主应用中注册新应用
+
+编辑 `packages/main-app/src/config/microApps.js`（或 mock 文件），添加：
+
+```javascript
+{
+  id: 'my-first-app',
+  name: '我的第一个应用',
+  entry: 'http://localhost:7081',  // 你的应用端口
+  activeRule: '/my-first-app',     // 访问路径前缀
+  container: '#micro-app-container',
+  status: 'online',
+  version: '1.0.0',
+  preload: false,                  // 不预加载
+  type: 'vue3',
+  icon: 'Monitor',                 // Element Plus 图标
+  layoutType: 'default',           // 默认布局
+  layoutOptions: {
+    showHeader: true,
+    showSidebar: true,
+    keepAlive: false
+  },
+  props: {
+    routerBase: '/my-first-app'
+  }
+}
+```
+
+---
+
+## 🎯 常用开发场景
+
+### 场景 1：子应用之间如何跳转？
+
+**在子应用中跳转到其他应用：**
+
+```javascript
+// 方法 1：使用 Bridge API
+window.__ARTISAN_BRIDGE__.navigateTo({
+  appId: 'vue2-sub-app',  // 目标应用 ID
+  path: '/detail/123'     // 目标路径
+})
+
+// 方法 2：直接修改 window.location
+window.location.href = '/vue2/detail/123'
+```
+
+**跳转到主应用：**
+
+```javascript
+window.__ARTISAN_BRIDGE__.navigateToMain('/home')
+```
+
+### 场景 2：子应用之间如何通信？
+
+**发送消息：**
+
+```javascript
+// 在子应用 A 中
+window.__ARTISAN_BRIDGE__.emit('user-login', { userId: 123 })
+```
+
+**接收消息：**
+
+```javascript
+// 在子应用 B 中
+window.__ARTISAN_BRIDGE__.on('user-login', (data) => {
+  console.log('收到用户登录信息:', data)
+})
+```
+
+### 场景 3：如何获取当前应用信息？
+
+```javascript
+// 获取当前应用 ID
+const appId = window.__ARTISAN_APP_ID__
+
+// 获取主应用提供的 props
+const props = window.__MICRO_APP_PROPS__
+
+// 获取所有已加载的应用
+const apps = window.__ARTISAN_MICRO_APP_MANAGER__.getLoadedApps()
+```
+
+### 场景 4：动态更新应用配置
+
+```javascript
+import { updateMicroAppConfig } from '@/config/microApps'
+
+// 更新某个应用的配置
+updateMicroAppConfig('my-app', {
+  status: 'offline',  // 设置为离线
+  version: '1.0.1'    // 更新版本号
+})
+```
+
+### 场景 5：预加载提升性能
+
+在配置文件中设置 `preload: true`：
+
+```javascript
+{
+  id: 'important-app',
+  name: '重要应用',
+  preload: true  // 空闲时自动预加载
+}
+```
+
+---
+
+## 🔧 故障排查速查表
+
+### 问题 1：子应用无法加载
+
+**可能原因：**
+- ❌ 端口冲突或被占用
+- ❌ 入口地址配置错误
+- ❌ 子应用未启动
+
+**解决方法：**
+```bash
+# 1. 检查端口是否被占用
+lsof -i :7080
+
+# 2. 确认子应用已启动
+npm run dev:vue3
+
+# 3. 检查配置中的 entry 地址
+# 在 microApps.js 中确认 entry 与实际端口一致
+```
+
+### 问题 2：路由跳转失败
+
+**可能原因：**
+- ❌ activeRule 配置不匹配
+- ❌ 路由基础路径未正确设置
+
+**解决方法：**
+```javascript
+// 确保 activeRule 与访问路径一致
+{
+  activeRule: '/my-app',  // 访问 /my-app/* 时激活
+  props: {
+    routerBase: '/my-app'  // 子应用路由基础路径
+  }
+}
+```
+
+### 问题 3：样式冲突
+
+**可能原因：**
+- ❌ 全局样式污染
+- ❌ CSS 选择器冲突
+
+**解决方法：**
+```css
+/* 在子应用中使用 scoped */
+<style scoped>
+.my-component {
+  /* 样式只在当前组件生效 */
+}
+</style>
+
+/* 或使用 CSS Modules */
+<style module>
+.container {
+  /* 类名会被哈希化 */
+}
+</style>
+```
+
+### 问题 4：跨域问题（iframe）
+
+**解决方法：**
+```javascript
+// 在 iframe 子应用中配置允许跨域
+// vite.config.js
+export default {
+  server: {
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    }
+  }
+}
+```
+
+### 问题 5：状态不同步
+
+**使用 Bridge 同步状态：**
+
+```javascript
+// 应用 A：发送状态更新
+window.__ARTISAN_BRIDGE__.emit('state-change', newState)
+
+// 应用 B：监听并同步状态
+window.__ARTISAN_BRIDGE__.on('state-change', (newState) => {
+  // 更新本地状态
+})
+```
+
+---
+
+## 📝 最佳实践建议
+
+### 1. 项目组织
+
+```
+my-sub-app/
+├── src/
+│   ├── api/              # API 接口
+│   ├── components/       # 公共组件
+│   ├── views/           # 页面组件
+│   ├── stores/          # 状态管理
+│   └── utils/           # 工具函数
+├── .env.development     # 开发环境变量
+└── .env.production      # 生产环境变量
+```
+
+### 2. 命名规范
+
+- **应用 ID**: 使用 kebab-case，如 `user-management`
+- **路由路径**: 与应用 ID 保持一致，如 `/user-management`
+- **端口号**: 避免冲突，建议使用 7xxx、8xxx、9xxx
+
+### 3. 性能优化
+
+- ✅ 对常用应用启用 `preload: true`
+- ✅ 使用 `keepAlive: true` 缓存不常变化的应用
+- ✅ 按需加载大型组件
+- ✅ 优化构建产物大小
+
+### 4. 安全考虑
+
+- ⚠️ iframe 应用注意配置 CSP 策略
+- ⚠️ 敏感操作需要权限验证
+- ⚠️ 跨域资源共享设置合理的白名单
+
+---
+
+## 🎓 进阶学习路径
+
+完成本指南后，你可以继续学习：
+
+1. **[主应用深度解析](./main-app.md)** - 了解主应用的完整架构
+2. **[子应用开发指南](./sub-apps.md)** - 各类子应用的详细开发流程
+3. **[布局系统](./layout-system.md)** - 灵活控制页面布局
+4. **[iframe 跨域治理](./iframe-governance.md)** - 解决复杂的跨域问题
+5. **[部署指南](./deployment.md)** - 将应用部署到生产环境
+
+---
+
+## 💬 常见问题 FAQ
+
+**Q: 我应该选择哪种类型的子应用？**
+- 新项目首选 **Vue 3**（性能好、生态新）
+- 老项目迁移可用 **Vue 2**
+- 独立系统嵌入用 **iframe**
+- 外部链接用 **link**
+
+**Q: 开发时应该用 mock 还是 API 模式？**
+- 前期开发、演示 Demo → **mock 模式** (`dev:all:mock`)
+- 对接后端、集成测试 → **API 模式** (`dev:all`)
+
+**Q: 如何调试子应用？**
+- 打开浏览器开发者工具
+- 在 Console 中输入 `window.__ARTISAN_MICRO_APP_MANAGER__` 查看管理器状态
+- 使用 `window.__ARTISAN_BRIDGE__` 测试通信
+
+**Q: 多个子应用可以使用相同的技术栈吗？**
+- 可以！虽然示例中有 Vue2 和 Vue3，但实际可以全部使用 Vue3 或其他框架
+
+---
+
+## 🆘 获取帮助
+
+- 📖 查看完整文档：[user-docs](./user-docs/)
+- 🐛 报告问题：GitHub Issues
+- 💬 社区讨论：GitHub Discussions
+
+---
+
+**🎉 恭喜你完成了快速入门！现在就开始创建你的微前端应用吧！**

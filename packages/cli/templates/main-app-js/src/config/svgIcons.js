@@ -83,4 +83,3 @@ export function hasSvgIcon(svgName) {
 export function getAvailableSvgIcons() {
   return Object.keys(svgIcons)
 }
-

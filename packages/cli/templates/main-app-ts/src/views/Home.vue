@@ -177,10 +177,9 @@ function getTypeTagType(type) {
   const typeMap = {
     vue3: 'success',
     vue2: 'warning',
-    iframe: 'info',
-    link: ''
+    iframe: 'info'
   }
-  return typeMap[type] || ''
+  return typeMap[type] || 'info' // 默认使用 info
 }
 
 function handleNavAppClick(app) {

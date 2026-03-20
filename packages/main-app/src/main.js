@@ -4,6 +4,8 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
+// 导入 grid-layout-plus 组件（支持 Vue 3）
+import { GridLayout, GridItem } from 'grid-layout-plus'
 
 import App from './App.vue'
 import router from './router'
@@ -28,6 +30,10 @@ await appStore.initialize()
 app.use(router)
 app.use(ElementPlus)
 
+// 全局注册 grid-layout-plus 组件
+app.component('grid-layout', GridLayout)
+app.component('grid-item', GridItem)
+
 // Register Element Plus icons
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
@@ -41,5 +47,3 @@ app.mount('#app')
 
 // Expose microAppManager globally for debugging
 window.__ARTISAN_MICRO_APP_MANAGER__ = microAppManager
-
-console.log('[Main App] Application started')
