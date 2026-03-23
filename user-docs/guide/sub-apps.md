@@ -17,7 +17,7 @@
 
 ### 技术特点
 
-- 基于 **Vite 7.3.1** 构建，开发体验极佳
+- 基于 **Vite 8.0.1** 构建，开发体验极佳
 - 使用 **vite-plugin-qiankun** 集成微前端能力
 - 支持 **热模块替换 (HMR)**，开发效率高
 - 复用主应用的 Element Plus 样式，避免重复加载
@@ -194,11 +194,11 @@ export default defineConfig({
   },
   "dependencies": {
     "vue": "^3.5.29",
-    "vue-router": "^5.0.3",
-    "element-plus": "^2.13.2"
+    "vue-router": "^5.0.4",
+    "element-plus": "^2.13.6"
   },
   "devDependencies": {
-    "vite": "^7.3.1",
+    "vite": "^8.0.1",
     "vite-plugin-qiankun": "^1.0.15",
     "typescript": "^5.9.3"
   }

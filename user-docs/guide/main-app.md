@@ -7,13 +7,13 @@
 主应用采用现代化的技术栈构建：
 
 - **Vue**: 3.5.29 - 响应式框架
-- **Vite**: 7.3.1 - 下一代构建工具
-- **Vue Router**: 5.0.3 - 官方路由
+- **Vite**: 8.0.1 - 下一代构建工具
+- **Vue Router**: 5.0.4 - 官方路由
 - **Pinia**: 3.x - Vue 3 状态管理库
 - **Pinia Plugin Persistedstate**: 4.2.3 - Pinia 持久化插件
 - **qiankun**: 2.10.16 - 微前端框架（loadMicroApp 模式）
-- **Element Plus**: 2.13.2 - UI 组件库
-- **Axios**: 1.13.5 - HTTP 客户端
+- **Element Plus**: 2.13.6 - UI 组件库
+- **Axios**: 1.13.6 - HTTP 客户端
 - **Grid Layout Plus**: 1.1.1 - 网格布局组件
 
 ## 🚀 启动流程
