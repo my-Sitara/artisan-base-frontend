@@ -21,7 +21,7 @@
  * @module core/subAppRequestProvider
  */
 
-import { createCustomRequest } from '@/utils/request'
+import { createCustomRequest, mainRequest } from '@/utils/request'
 import { createFileOperations, downloadFile, downloadExcel, downloadPDF, uploadFile } from '@/utils/fileOperations'
 import { TOKEN_KEY, USER_INFO_KEY, API_BASE_URL, APP_VERSION } from '@/config/app'
 
