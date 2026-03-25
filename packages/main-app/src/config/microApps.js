@@ -96,9 +96,10 @@ export async function loadMicroApps(options = {}) {
  * @returns {Promise<Array>} 微应用配置数组
  */
 export async function initMicroApps(customApiUrl) {
-  const useApi = import.meta.env.VITE_USE_MICRO_APPS_API === 'true'
-  const defaultApiUrl = import.meta.env.VITE_MICRO_APPS_API_URL || '/api/micro-apps'
-  const apiUrl = customApiUrl || defaultApiUrl
+  const { USE_MICRO_APPS_API, MICRO_APPS_API_URL } = await import('./app.js')
+  
+  const useApi = USE_MICRO_APPS_API
+  const apiUrl = customApiUrl || MICRO_APPS_API_URL
   
   const source = useApi ? 'api' : 'mock'
   return loadMicroApps({ source, apiUrl })

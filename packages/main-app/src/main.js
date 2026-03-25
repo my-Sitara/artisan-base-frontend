@@ -12,6 +12,7 @@ import router from './router'
 import { useAppStore } from '@/stores/app'
 import { setupBridge } from './core/bridge'
 import { microAppManager } from './core/microAppManager'
+import { initSubAppRequest } from './core/subAppRequestProvider'
 
 import './assets/styles/main.scss'
 
@@ -41,6 +42,9 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 // Setup bridge for cross-app communication
 setupBridge()
+
+// 初始化子应用 Request 提供者（在微应用加载之前）
+initSubAppRequest()
 
 // Mount app
 app.mount('#app')

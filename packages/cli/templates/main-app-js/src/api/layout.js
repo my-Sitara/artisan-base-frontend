@@ -8,15 +8,11 @@
  * 通过环境变量 VITE_USE_LAYOUT_API 控制
  */
 
-const STORAGE_KEY = 'artisan-multi-app-layout'
+import { API_BASE_URL, USE_LAYOUT_API } from '@/config/app'
 
-// API 基础 URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+const STORAGE_KEY = 'artisan-multi-app-layout'
 const LAYOUT_SAVE_API = `${API_BASE_URL}/multi-app-layout/save`
 const LAYOUT_LOAD_API = `${API_BASE_URL}/multi-app-layout/load`
-
-// 是否使用 API 模式
-const USE_API = import.meta.env.VITE_USE_LAYOUT_API === 'true'
 
 /**
  * 保存布局数据

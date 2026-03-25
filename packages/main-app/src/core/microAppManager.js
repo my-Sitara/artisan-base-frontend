@@ -3,6 +3,7 @@ import { reactive, markRaw } from 'vue'
 import { getCurrentMicroApps, getMicroApp, updateMicroAppConfig } from '@/config/microApps'
 import { useUserStore } from '@/stores/user'
 import { bridge } from './bridge'
+import { createSubAppProps } from './subAppRequestProvider'
 
 /**
  * 微应用管理器
@@ -105,16 +106,20 @@ class MicroAppManager {
         throw new Error(`Container not found: ${container}`)
       }
 
-      // name 必须与 vite-plugin-qiankun 注册的名字一致（即 appId），
-      // 否则 qiankun 无法在 global[name] 上找到生命周期钩子。
-      // 直接传 DOM 元素而非选择器字符串，避免修改容器 ID 导致刷新后找不到容器。
+      // 创建子应用 props，包含 request、auth 等能力
+      const subAppProps = createSubAppProps()
+      
       const app = loadMicroApp({
+        // name 必须与 vite-plugin-qiankun 注册的名字一致（即 appId），
+        // 否则 qiankun 无法在 global[name] 上找到生命周期钩子。
+        // 直接传 DOM 元素而非选择器字符串，避免修改容器 ID 导致刷新后找不到容器。
         name: appId,
         entry: config.entry,
         container: containerElement,
         props: {
           ...config.props,
           ...options.props,
+          ...subAppProps, // 合并 request 相关能力
           token: userStore.token,
           mainRouter: options.mainRouter,
           bridge: bridge,
@@ -218,12 +223,16 @@ class MicroAppManager {
       iframe.onload = () => {
         this.loadedApps[appId].status = 'mounted'
         
-        // 发送初始化消息
+        // 创建子应用 props（包含 request、auth 等）
+        const subAppProps = createSubAppProps()
+        
+        // 发送初始化消息（包含完整的 props）
         bridge.sendToIframe(iframe, {
           type: 'INIT',
           payload: {
             token: userStore.token,
-            appId: appId
+            appId: appId,
+            ...subAppProps // iframe 子应用也可以访问这些能力
           }
         })
         
