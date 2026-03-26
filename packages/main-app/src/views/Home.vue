@@ -113,6 +113,11 @@
               <span>多应用同屏</span>
             </div>
             
+            <div class="quick-nav-item" @click="goToMockTest">
+              <el-icon :size="24"><Debug /></el-icon>
+              <span>Mock 接口测试</span>
+            </div>
+            
             <div class="quick-nav-item" @click="goToManagement">
               <el-icon :size="24"><Setting /></el-icon>
               <span>应用管理</span>
@@ -159,7 +164,8 @@ import {
   Warning,
   Monitor,
   CopyDocument,
-  Setting
+  Setting,
+  Debug
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -212,6 +218,10 @@ function goToMultiInstance() {
 
 function goToManagement() {
   router.push('/app-management')
+}
+
+function goToMockTest() {
+  router.push('/mock-test')
 }
 
 function handleTokenChange(value) {

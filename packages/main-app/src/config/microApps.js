@@ -6,7 +6,7 @@
  * - mock: 从本地 mock 文件加载数据
  * - api: 从后端 API 接口加载数据
  * 
- * 通过环境变量 VITE_USE_MICRO_APPS_API 控制使用哪种模式
+ * 通过环境变量 VITE_MOCK_MODE 控制使用哪种模式
  * 
  * 配置项说明：
  * - id: 应用唯一标识
@@ -24,6 +24,7 @@
  */
 import { normalizeLayoutConfig, getDefaultLayoutOptions } from './layoutConfig'
 import { mainRequest } from '@/utils/request'
+import { USE_MOCK } from './app.js'
 
 // 通用的布局选项工厂函数（在数据加载后调用）
 const createLayoutOptions = (type, overrides = {}) => {
@@ -98,12 +99,12 @@ export async function loadMicroApps(options = {}) {
  * @returns {Promise<Array>} 微应用配置数组
  */
 export async function initMicroApps(customApiUrl) {
-  const { USE_MICRO_APPS_API, MICRO_APPS_API_URL } = await import('./app.js')
+  // 局部定义默认 API URL（遵循"在哪里使用，就在哪里定义"原则）
+  const DEFAULT_MICRO_APPS_API_URL = '/api/micro-apps'
   
-  const useApi = USE_MICRO_APPS_API
-  const apiUrl = customApiUrl || MICRO_APPS_API_URL
+  const source = USE_MOCK ? 'mock' : 'api'
+  const apiUrl = customApiUrl || DEFAULT_MICRO_APPS_API_URL
   
-  const source = useApi ? 'api' : 'mock'
   return loadMicroApps({ source, apiUrl })
 }
 

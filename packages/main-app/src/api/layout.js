@@ -5,11 +5,11 @@
  * - mock: 使用 localStorage（开发/演示）
  * - api: 使用后端 API（生产环境）
  * 
- * 通过环境变量 VITE_USE_LAYOUT_API 控制
+ * 通过环境变量 VITE_MOCK_MODE 控制
  */
 
 import { mainRequest } from '@/utils/request'
-import { USE_LAYOUT_API } from '@/config/app'
+import { USE_MOCK } from '@/config/app.js'
 
 const STORAGE_KEY = 'artisan-multi-app-layout'
 
@@ -19,7 +19,7 @@ const STORAGE_KEY = 'artisan-multi-app-layout'
  * @returns {Promise<Object>} 保存结果
  */
 export async function saveLayoutAPI(data) {
-  if (!USE_LAYOUT_API) {
+  if (USE_MOCK) {
     // Mock 模式：保存到 localStorage
     console.log('[LayoutAPI] Saving to localStorage (mock mode)')
     try {
@@ -62,7 +62,7 @@ export async function saveLayoutAPI(data) {
  * @returns {Promise<Object|null>} 布局数据
  */
 export async function loadLayoutAPI() {
-  if (!USE_LAYOUT_API) {
+  if (USE_MOCK) {
     // Mock 模式：从 localStorage 加载
     console.log('[LayoutAPI] Loading from localStorage (mock mode)')
     try {
@@ -110,9 +110,21 @@ export async function loadLayoutAPI() {
  * 清除布局数据
  */
 export function clearLayoutAPI() {
-  if (USE_API) {
+  if (!USE_MOCK) {
     console.log('[LayoutAPI] Clearing API data (not implemented)')
   }
   localStorage.removeItem(STORAGE_KEY)
   console.log('[LayoutAPI] Cleared localStorage')
+}
+
+/**
+ * 默认导出：将 API 函数挂载到 layout 对象上
+ * 支持两种调用方式：
+ * 1. import { loadLayoutAPI } from '@/api/layout' - 命名导入
+ * 2. import API from '@/api' -> API.layout.loadLayoutAPI() - 自动导入
+ */
+export default {
+  saveLayout: saveLayoutAPI,
+  loadLayout: loadLayoutAPI,
+  clearLayout: clearLayoutAPI
 }

@@ -31,6 +31,15 @@ const routes = [
     }
   },
   {
+    path: '/mock-test',
+    name: 'MockTest',
+    component: () => import('@/views/MockTestPage.vue'),
+    meta: {
+      title: 'Mock 接口测试',
+      layout: 'default'
+    }
+  },
+  {
     path: '/app-management',
     name: 'AppManagement',
     redirect: '/app-management/loading',

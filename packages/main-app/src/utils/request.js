@@ -13,6 +13,7 @@
 
 import axios from 'axios'
 import { createFileOperations } from './fileOperations'
+import { mockEngine } from './mockEngine'
 import { API_BASE_URL, REQUEST_TIMEOUT, TOKEN_KEY, DEFAULT_HEADERS } from '@/config/app'
 
 // 创建 axios 实例
@@ -34,6 +35,31 @@ request.interceptors.request.use(config => {
   if (config.method === 'get') {
     config.params = { ...config.params, _t: Date.now() }
   }
+
+  // Mock 路由判断
+  if (mockEngine.shouldUseMock(config.method, config.url)) {
+    config.adapter = async () => {
+      try {
+        const mockData = await mockEngine.handle(
+          config.method.toUpperCase(),
+          config.url,
+          config.data
+        )
+        return {
+          data: mockData,
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          config: config
+        }
+      } catch (error) {
+        console.warn(`[Mock] Handler not found for ${config.method} ${config.url}, falling back to API`)
+        delete config.adapter
+        return request(config)
+      }
+    }
+  }
+
   return config
 }, error => Promise.reject(error))
 

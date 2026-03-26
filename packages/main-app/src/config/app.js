@@ -32,19 +32,9 @@ export const USER_INFO_KEY = 'user-info'
 export const APP_VERSION = import.meta.env.PACKAGE_VERSION || '1.0.0'
 
 /**
- * 微应用 API 地址（可选）
+ * 是否启用 Mock 模式
  */
-export const MICRO_APPS_API_URL = import.meta.env.VITE_MICRO_APPS_API_URL || '/api/micro-apps'
-
-/**
- * 是否启用微应用 API 模式
- */
-export const USE_MICRO_APPS_API = import.meta.env.VITE_USE_MICRO_APPS_API === 'true'
-
-/**
- * 是否启用布局 API 模式
- */
-export const USE_LAYOUT_API = import.meta.env.VITE_USE_LAYOUT_API === 'true'
+export const USE_MOCK = import.meta.env.VITE_MOCK_MODE === 'true'
 
 /**
  * 默认请求头配置
@@ -62,8 +52,6 @@ export default {
   TOKEN_KEY,
   USER_INFO_KEY,
   APP_VERSION,
-  MICRO_APPS_API_URL,
-  USE_MICRO_APPS_API,
-  USE_LAYOUT_API,
+  USE_MOCK,
   DEFAULT_HEADERS
 }

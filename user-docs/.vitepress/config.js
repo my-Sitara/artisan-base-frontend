@@ -60,7 +60,8 @@ export default {
             { text: 'API 总结', link: '/api/README' },
             { text: 'MicroAppManager', link: '/api/micro-app-manager' },
             { text: 'Bridge', link: '/api/bridge' },
-            { text: '配置', link: '/api/config' }
+            { text: '配置', link: '/api/config' },
+            { text: '测试 API', link: '/api/test' }
           ]
         }
       ]

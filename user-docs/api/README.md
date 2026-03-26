@@ -8,6 +8,7 @@
 - [Bridge](#bridge) - 跨应用通信
 - [LayoutManager](#layoutmanager) - 布局管理
 - [配置 API](#配置-api) - 微应用配置管理
+- [测试 API](#测试-api) - Mock 接口测试
 
 ---
 
@@ -528,6 +529,110 @@ console.log(normalized.layoutOptions.showSidebar)  // false
 
 ---
 
+## 测试 API
+
+**导入**:
+```javascript
+// 方式一：命名导入
+import { getTestListAPI, createTestItemAPI, deleteTestItemAPI } from '@/api/test'
+
+// 方式二：统一导入
+import API from '@/api'
+```
+
+### 接口列表
+
+#### GET /api/test/list
+
+获取测试列表数据（支持分页和搜索）。
+
+```javascript
+const result = await API.test.getTestList({
+  page: 1,
+  pageSize: 10,
+  search: '关键词'
+})
+
+console.log(result) // { items: [...], total: 10, page: 1, pageSize: 10 }
+```
+
+**参数**:
+- `page` (number): 页码，默认 1
+- `pageSize` (number): 每页条数，默认 10
+- `search` (string): 搜索关键词
+
+**响应结构**:
+```javascript
+{
+  items: [
+    {
+      id: 1,
+      name: "测试项 1",
+      description: "这是第 1 个测试数据",
+      status: "active",
+      createdAt: "2026-03-26T10:00:00.000Z",
+      tags: ["测试", "示例"]
+    }
+  ],
+  total: 10,
+  page: 1,
+  pageSize: 10
+}
+```
+
+#### POST /api/test
+
+创建测试数据项。
+
+```javascript
+const newItem = await API.test.createTestItem({
+  name: '新测试项',
+  description: '详细描述'
+})
+```
+
+#### DELETE /api/test/:id
+
+删除测试数据项。
+
+```javascript
+await API.test.deleteTestItem(123)
+```
+
+### Mock 数据特征
+
+当启用 Mock 模式时（`VITE_MOCK_MODE=true`），自动生成模拟数据：
+
+- **数据生成**：每次请求动态生成，不持久化
+- **状态随机**：`active` | `pending` | `inactive`
+- **标签组合**：从 `['测试', '示例', 'Mock']` 中随机选择
+- **时间戳**：最近 90 天内的随机时间
+
+### 使用场景
+
+- ✅ Mock 系统功能演示
+- ✅ 前端开发自测
+- ✅ API 接口格式验证
+- ✅ 分页和搜索功能测试
+
+### 注意事项
+
+⚠️ **重要**：由于 `request` 拦截器已经自动解包了 `res.data`，所以直接访问 `result.items` 而不是 `result.data.items`。
+
+```javascript
+// ❌ 错误
+const result = await API.test.getTestList()
+testListData.value = result.data?.items
+
+// ✅ 正确
+const result = await API.test.getTestList()
+testListData.value = result.items
+```
+
+📖 **详细文档**: [测试 API](./test.md)
+
+---
+
 ## 全局调试对象
 
 主应用在控制台暴露全局对象：
@@ -568,5 +673,6 @@ window.__ARTISAN_LAYOUT_MANAGER__.setLayout('full')
 - [MicroAppManager API](./micro-app-manager.md) - 详细文档
 - [Bridge API](./bridge.md) - 详细文档
 - [配置 API](./config.md) - 详细文档
+- [测试 API](./test.md) - Mock 接口测试详细文档
 - [主应用开发](../guide/main-app.md) - 主模块使用详解
 - [子应用开发](../guide/sub-apps.md) - 子应用集成指南

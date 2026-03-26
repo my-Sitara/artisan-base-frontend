@@ -14,7 +14,7 @@
 import collectionModules from '@/utils/collectionModules'
 
 // 自动导入当前目录下所有 .js 和 .ts 文件（排除 index.js 和 index.ts）
-const context = require.context('.', false, /\.(js|ts)$/)
+const context = import.meta.glob('./*.{js,ts}', { eager: true })
 const apis = collectionModules({}, context, {
   expand: false  // false: 按模块名组织 { layout: {...}, user: {...} }
                  // true: 直接展开所有函数

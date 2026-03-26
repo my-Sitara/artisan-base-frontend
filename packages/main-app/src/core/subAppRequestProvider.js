@@ -24,6 +24,7 @@
 import { createCustomRequest, mainRequest } from '@/utils/request'
 import { createFileOperations, downloadFile, downloadExcel, downloadPDF, uploadFile } from '@/utils/fileOperations'
 import { TOKEN_KEY, USER_INFO_KEY, API_BASE_URL, APP_VERSION } from '@/config/app'
+import { mockEngine } from '@/utils/mockEngine'
 
 /**
  * 为 window 挂载 request 能力（供子应用直接访问）
@@ -42,6 +43,9 @@ export function provideRequestToSubApps() {
     // ✅ 提供主应用的完整 request 能力
     // 推荐使用 $request（更简洁），但 request 也可以用（向后兼容）
     window.$request = mainRequest
+    
+    // ✅ 新增：提供 mockEngine 给子应用
+    window.$mockEngine = mockEngine
     
     // ✅ 提供工厂函数，让子应用可以自己创建
     window.createCustomRequest = createCustomRequest
@@ -85,6 +89,9 @@ export function createSubAppProps(options = {}) {
   const props = {
     // ✅ 主应用 request 能力（推荐使用 $request）
     $request: mainRequest,
+    
+    // ✅ 新增：Mock 引擎能力（供子应用注册自己的 mock handlers）
+    $mockEngine: mockEngine,
     
     // ✅ Token 管理
     auth,
