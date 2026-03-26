@@ -39,6 +39,12 @@
 
 #### 布局系统
 
+- **[布局管理指南](./guide/layout-management.md)** ⭐⭐⭐⭐⭐
+  - 布局类型详解（default/full/embedded/blank）
+  - 配置方法和示例
+  - Mock/API 双模式说明
+  - 后端集成指南
+
 - **[布局系统（快速参考）](./guide/layout-system.md)** ⭐⭐⭐
   - 布局类型速览
   - 快速配置示例
@@ -60,6 +66,13 @@
   - 初始化流程
 
 #### 其他主题
+
+- **[后端集成指南](./guide/backend-integration.md)** ⭐⭐⭐⭐
+  - Node.js/Express 实现
+  - Spring Boot 实现
+  - Python/FastAPI 实现
+  - JWT 认证集成
+  - 生产环境部署
 
 - **[部署指南](./guide/deployment.md)** ⭐⭐⭐⭐
   - 构建流程
@@ -143,7 +156,7 @@
 
 - [子应用开发](./guide/sub-apps.md) - 各种类型子应用集成
 - [Bridge API](./api/bridge.md) - 跨应用通信
-- [布局系统完整指南](./guide/layout-system-complete-guide.md) - 布局配置
+- [布局管理指南](./guide/layout-management.md) - 布局配置
 - [MicroAppManager API](./api/micro-app-manager.md) - 应用管理
 
 ### 🏗️ 架构师
@@ -153,6 +166,7 @@
 - [项目概述](./guide/overview.md) - 整体架构
 - [主应用开发](./guide/main-app.md) - 核心模块设计
 - [iframe 治理](./guide/iframe-governance.md) - 安全策略
+- [后端集成指南](./guide/backend-integration.md) - 后端对接方案
 - [部署指南](./guide/deployment.md) - 生产环境
 
 ### 🚀 运维工程师
@@ -182,9 +196,11 @@
 
 ### 布局系统
 
+- [布局管理指南](./guide/layout-management.md) - 使用指南
+- [后端集成指南](./guide/backend-integration.md) - 后端实现
 - [布局系统完整指南](./guide/layout-system-complete-guide.md) - 完整文档
 - [布局系统（快速参考）](./guide/layout-system.md) - 快速参考
-- [主应用 - LayoutManager](./guide/main-app.md#3-layoutmanager 布局管理器) - 详解
+- [主应用 - LayoutManager](./guide/main-app.md#3-layoutmanager-布局管理器) - 详解
 
 ### Iframe 集成
 
@@ -213,11 +229,13 @@
 ✅ 阅读 [主应用开发](./guide/main-app.md)  
 ✅ 阅读 [子应用开发](./guide/sub-apps.md)  
 ✅ 尝试创建自己的子应用  
-✅ 理解布局系统  
+✅ 阅读 [布局管理指南](./guide/layout-management.md)
+✅ 阅读 [布局系统完整指南](./guide/layout-system-complete-guide.md)  
 
 ### Level 3: 进阶 (1-2 周)
 
 ✅ 阅读 [布局系统完整指南](./guide/layout-system-complete-guide.md)  
+✅ 阅读 [后端集成指南](./guide/backend-integration.md)  
 ✅ 阅读 [iframe 治理](./guide/iframe-governance.md)  
 ✅ 实现跨应用通信  
 ✅ 学习最佳实践  
@@ -238,11 +256,12 @@
 1. [快速开始](./guide/getting-started.md) - 新手必读
 2. [项目概述](./guide/overview.md) - 了解平台
 3. [子应用开发](./guide/sub-apps.md) - 开发指南
-4. [布局系统完整指南](./guide/layout-system-complete-guide.md) - 布局详解
+4. [布局管理指南](./guide/layout-management.md) - 布局详解
 5. [API 总结](./api/README.md) - 快速参考
 6. [主应用开发](./guide/main-app.md) - 核心模块
 7. [iframe 治理](./guide/iframe-governance.md) - 安全策略
-8. [部署指南](./guide/deployment.md) - 部署流程
+8. [后端集成指南](./guide/backend-integration.md) - 后端对接
+9. [部署指南](./guide/deployment.md) - 部署流程
 
 ---
 
@@ -262,7 +281,7 @@
 
 ### Q: 布局配置不生效怎么办？
 
-**A**: 阅读 [布局系统完整指南](./guide/layout-system-complete-guide.md) 中的"故障排除"部分。
+**A**: 阅读 [布局管理指南](./guide/layout-management.md) 或 [布局系统完整指南](./guide/layout-system-complete-guide.md) 中的"故障排除"部分。
 
 ### Q: Iframe 通信失败？
 
@@ -272,6 +291,7 @@
 
 ## 📝 文档更新记录
 
+- **2025-03-25**: 新增布局管理指南、后端集成指南，整合 API 自动导入文档
 - **2024-02-26**: 重写项目概述、快速开始、主应用、子应用文档
 - **2024-02-25**: 创建 API 总结文档
 - **2024-02-24**: 更新布局系统文档

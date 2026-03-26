@@ -71,16 +71,20 @@ request.interceptors.response.use(
   }
 )
 
+// ============ 默认导出 ============
 export default request
+
+// ============ HTTP 方法导出 ============
 export const { get, post, put, delete: del, patch } = request
 
-// Token 管理工具
+// ============ Token 管理工具 ============
 export const setToken = token => localStorage.setItem(TOKEN_KEY, token)
 export const getToken = () => localStorage.getItem(TOKEN_KEY)
 export const clearToken = () => localStorage.removeItem(TOKEN_KEY)
 
+// ============ 主应用完整 request 能力包 ============
 /**
- * 为主应用创建完整的 request 能力包
+ * mainRequest - 主应用完整的 request 能力包
  * 
  * 包含：
  * - HTTP 方法（get, post, put, delete, patch）
@@ -100,8 +104,9 @@ const mainRequest = {
 
 export { mainRequest }
 
+// ============ 工厂函数 ============
 /**
- * 创建自定义 baseURL 的 request 实例
+ * createCustomRequest - 创建自定义 baseURL 的 request 实例
  * 
  * @param {string} baseURL - API 基础地址
  * @param {Object} options - 配置选项

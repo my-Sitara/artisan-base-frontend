@@ -23,6 +23,7 @@
  * - 使用 getValidatedMicroApp 可获取经过验证的配置
  */
 import { normalizeLayoutConfig, getDefaultLayoutOptions } from './layoutConfig'
+import { mainRequest } from '@/utils/request'
 
 // 通用的布局选项工厂函数（在数据加载后调用）
 const createLayoutOptions = (type, overrides = {}) => {
@@ -71,9 +72,10 @@ export async function loadMicroApps(options = {}) {
       rawData = mockData.default.data.apps || mockData.default.apps || []
     } else if (source === 'api') {
       console.log('[microApps] Loading from API:', apiUrl)
-      const response = await fetch(apiUrl)
-      const data = await response.json()
-      rawData = data.apps || data.data?.apps || []
+      // ✅ 直接使用封装好的 request（主应用自己使用，不需要动态导入）
+      const response = await mainRequest.get(apiUrl)
+      // 兼容不同的响应格式
+      rawData = response?.apps || response?.data?.apps || []
     }
     
     // 处理并标准化数据

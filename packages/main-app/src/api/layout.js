@@ -8,11 +8,10 @@
  * 通过环境变量 VITE_USE_LAYOUT_API 控制
  */
 
-import { API_BASE_URL, USE_LAYOUT_API } from '@/config/app'
+import { mainRequest } from '@/utils/request'
+import { USE_LAYOUT_API } from '@/config/app'
 
 const STORAGE_KEY = 'artisan-multi-app-layout'
-const LAYOUT_SAVE_API = `${API_BASE_URL}/multi-app-layout/save`
-const LAYOUT_LOAD_API = `${API_BASE_URL}/multi-app-layout/load`
 
 /**
  * 保存布局数据
@@ -20,7 +19,7 @@ const LAYOUT_LOAD_API = `${API_BASE_URL}/multi-app-layout/load`
  * @returns {Promise<Object>} 保存结果
  */
 export async function saveLayoutAPI(data) {
-  if (!USE_API) {
+  if (!USE_LAYOUT_API) {
     // Mock 模式：保存到 localStorage
     console.log('[LayoutAPI] Saving to localStorage (mock mode)')
     try {
@@ -32,39 +31,21 @@ export async function saveLayoutAPI(data) {
     }
   }
   
-  // API 模式：发送到后端
-  console.log('[LayoutAPI] Saving to API:', LAYOUT_SAVE_API)
+  // API 模式：发送到后端（使用封装的 request，自动注入 Token）
+  console.log('[LayoutAPI] Saving to API')
   try {
-    const response = await fetch(LAYOUT_SAVE_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-    
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('[LayoutAPI] API response error:', response.status, errorText)
-      
-      // API 失败时降级到 localStorage
-      console.warn('[LayoutAPI] Falling back to localStorage')
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-      
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    
-    const result = await response.json()
+    // ✅ 使用 mainRequest.post，自动包含 Token 和统一错误处理
+    const result = await mainRequest.post('/multi-app-layout/save', data)
     console.log('[LayoutAPI] Saved successfully:', result)
     
-    // 同时备份到 localStorage
+    // 同时备份到 localStorage（防止数据丢失）
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
     
     return result
   } catch (error) {
     console.error('[LayoutAPI] Failed to save to API:', error)
     
-    // 网络错误时降级到 localStorage
+    // API 失败时降级到 localStorage
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
       console.warn('[LayoutAPI] Saved to localStorage as fallback')
@@ -81,7 +62,7 @@ export async function saveLayoutAPI(data) {
  * @returns {Promise<Object|null>} 布局数据
  */
 export async function loadLayoutAPI() {
-  if (!USE_API) {
+  if (!USE_LAYOUT_API) {
     // Mock 模式：从 localStorage 加载
     console.log('[LayoutAPI] Loading from localStorage (mock mode)')
     try {
@@ -94,26 +75,12 @@ export async function loadLayoutAPI() {
     }
   }
   
-  // API 模式：从后端加载
-  console.log('[LayoutAPI] Loading from API:', LAYOUT_LOAD_API)
+  // API 模式：从后端加载（使用封装的 request）
+  console.log('[LayoutAPI] Loading from API')
   try {
-    const response = await fetch(LAYOUT_LOAD_API, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    
-    if (!response.ok) {
-      console.warn('[LayoutAPI] API load failed, trying localStorage')
-      // API 失败时使用 localStorage 作为降级
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return null
-      return JSON.parse(raw)
-    }
-    
-    const result = await response.json()
-    const data = result.data || result
+    // ✅ 使用 mainRequest.get，自动包含 Token
+    const result = await mainRequest.get('/multi-app-layout/load')
+    const data = result || {}
     console.log('[LayoutAPI] Loaded successfully:', data)
     
     // 同时备份到 localStorage

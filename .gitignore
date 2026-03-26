@@ -52,5 +52,9 @@ coverage/
 user-docs/.vitepress/dist
 user-docs/.vitepress/cache
 
+
 # Lerna
 lerna-debug.log
+
+#tempMd
+tempMd/
