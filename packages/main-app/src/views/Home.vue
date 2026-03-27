@@ -114,7 +114,7 @@
             </div>
             
             <div class="quick-nav-item" @click="goToMockTest">
-              <el-icon :size="24"><Debug /></el-icon>
+              <el-icon :size="24"><Tools /></el-icon>
               <span>Mock 接口测试</span>
             </div>
             
@@ -165,7 +165,7 @@ import {
   Monitor,
   CopyDocument,
   Setting,
-  Debug
+  Tools
 } from '@element-plus/icons-vue'
 
 const router = useRouter()

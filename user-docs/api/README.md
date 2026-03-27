@@ -7,6 +7,7 @@
 - [MicroAppManager](#microappmanager) - 微应用实例管理
 - [Bridge](#bridge) - 跨应用通信
 - [LayoutManager](#layoutmanager) - 布局管理
+- [布局数据 API](#布局数据-api) - 布局保存与加载
 - [配置 API](#配置-api) - 微应用配置管理
 - [测试 API](#测试-api) - Mock 接口测试
 
@@ -448,6 +449,136 @@ layoutOptions: {
 | full | 强制隐藏 header、sidebar |
 | embedded | 强制隐藏 sidebar |
 | blank | 强制隐藏 header、sidebar |
+
+---
+
+## 布局数据 API
+
+**导入**:
+```javascript
+// 方式一：使用 Composable（推荐 - 包含 mock/API 模式切换、localStorage 降级策略）
+import { saveLayout, loadLayout, clearLayout } from '@/composables/useLayout'
+
+// 方式二：直接使用 API（仅纯 HTTP 调用，无业务逻辑）
+import { saveLayoutAPI, loadLayoutAPI, clearLayoutAPI } from '@/api/layout'
+```
+
+### 架构设计
+
+布局数据管理采用**分层架构**：
+
+- **`@/api/layout`** - 纯 API 调用模块（仅 HTTP 请求，无业务逻辑）
+- **`@/composables/useLayout`** - 业务逻辑层（mock/API 切换、localStorage 降级、容错策略）
+
+### 推荐使用方式
+
+#### 保存布局数据
+
+```javascript
+import { saveLayout } from '@/composables/useLayout'
+
+async function saveLayoutData() {
+  const data = {
+    layoutMode: 'grid-free',
+    panels: [...]
+  }
+  
+  try {
+    const result = await saveLayout(data)
+    console.log('保存成功:', result)
+  } catch (error) {
+    console.error('保存失败:', error)
+  }
+}
+```
+
+#### 加载布局数据
+
+```javascript
+import { loadLayout } from '@/composables/useLayout'
+
+async function loadLayoutData() {
+  const data = await loadLayout()
+  if (data) {
+    // 恢复布局
+    console.log('加载的布局:', data)
+  }
+}
+```
+
+#### 清除布局数据
+
+```javascript
+import { clearLayout } from '@/composables/useLayout'
+
+clearLayout()
+```
+
+### API 模式说明
+
+#### Mock 模式（`USE_MOCK = true`）
+
+- **保存**: 直接保存到 `localStorage`
+- **加载**: 从 `localStorage` 加载
+- **清除**: 清除 `localStorage`
+
+#### API 模式（`USE_MOCK = false`）
+
+- **保存**: 发送到后端 API + `localStorage` 备份，失败时降级到 `localStorage`
+- **加载**: 从后端 API 加载 + `localStorage` 备份，失败时从 `localStorage` 恢复
+- **清除**: 清除 `localStorage`
+
+### 降级策略
+
+当 API 调用失败时，系统会自动降级到 `localStorage`，确保数据不丢失：
+
+```javascript
+// saveLayout 内部逻辑
+try {
+  const result = await saveLayoutAPI(data)  // 发送到后端
+  saveToLocal(data)  // 同时备份
+  return result
+} catch (error) {
+  saveToLocal(data)  // 降级：保存到 localStorage
+  throw error
+}
+```
+
+### 直接使用 API（不推荐）
+
+如果只需要纯 HTTP 调用（不包含 mock 切换和降级逻辑），可以直接使用 API：
+
+```javascript
+import { saveLayoutAPI, loadLayoutAPI } from '@/api/layout'
+
+async function saveDirect() {
+  const data = { layoutMode: 'grid-free', panels: [...] }
+  const result = await saveLayoutAPI(data)
+  return result
+}
+
+async function loadDirect() {
+  const data = await loadLayoutAPI()
+  return data
+}
+```
+
+### 后端接口要求
+
+后端需要提供以下接口：
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/multi-app-layout/save` | POST | 保存布局数据 |
+| `/multi-app-layout/load` | GET | 加载布局数据 |
+| `/multi-app-layout/clear` | DELETE | 清除布局数据（可选） |
+
+### 环境变量控制
+
+通过 `VITE_USE_MOCK` 环境变量控制模式：
+
+- `.env.development`: `VITE_USE_MOCK=true`（开发时使用 mock）
+- `.env.production`: `VITE_USE_MOCK=false`（生产环境使用 API）
 
 ---
 

@@ -20,9 +20,9 @@ export const mockWhitelist = {
   // 微应用配置接口
   'GET /api/micro-apps': true,
   
-  // 布局数据接口
-  'GET /multi-app-layout/load': true,
-  'POST /multi-app-layout/save': true,
+  // 注意：Layout 布局接口（/multi-app-layout/*）由 composables/useLayout.js
+  // 独立管理 mock 逻辑（通过 localStorage 实现），不通过 mockEngine 处理。
+  // 因此不在此白名单中配置，避免产生 "Handler not found" 警告。
   
   // 测试接口
   'GET /api/test/list': true,

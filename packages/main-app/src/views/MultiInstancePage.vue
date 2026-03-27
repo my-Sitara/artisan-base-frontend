@@ -293,7 +293,7 @@ import { Plus, Refresh, Close, Edit, InfoFilled, Check, ArrowLeft, ArrowRight } 
 import { ElMessage } from 'element-plus'
 // 导入 grid-layout-plus 组件（支持 Vue 3）
 import { GridLayout, GridItem } from 'grid-layout-plus'
-import { saveLayoutAPI, loadLayoutAPI } from '@/api/layout'
+import { saveLayout as saveLayoutToAPI, loadLayout } from '@/composables/useLayout'
 
 console.log('[MultiInstancePage] GridLayout:', GridLayout)
 console.log('[MultiInstancePage] GridItem:', GridItem)
@@ -1036,7 +1036,7 @@ async function saveLayout() {
   }
   
   try {
-    const result = await saveLayoutAPI(data)
+    const result = await saveLayoutToAPI(data)
     return result
   } catch (error) {
     console.error('[MultiApp] Failed to save layout:', error)
@@ -1051,7 +1051,7 @@ async function saveLayout() {
 // 持久化：从后端 API 恢复并重新加载应用（通过 api/layout.js）
 async function restoreLayout() {
   try {
-    const data = await loadLayoutAPI()
+    const data = await loadLayout()
     if (!data || !data.panels || data.panels.length === 0) return
     
     // 设置恢复标记，防止初始化时的更新被保存

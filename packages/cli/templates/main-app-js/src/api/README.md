@@ -2,20 +2,28 @@
 
 ## 概述
 
-此模块提供多应用同屏页布局数据的持久化功能，支持两种模式：
-- **Mock 模式**：使用 `localStorage`（开发/演示环境）
-- **API 模式**：使用后端 REST API（生产环境）
+此模块提供多应用同屏页布局数据的持久化功能，采用**分层架构设计**：
 
-通过环境变量 `VITE_USE_LAYOUT_API` 灵活控制。
+- **`@/api/layout`** - 纯 API 调用模块（仅 HTTP 请求，无业务逻辑）
+- **`@/composables/useLayout`** - 业务逻辑层（mock/API 模式切换、localStorage 降级、容错策略）
+
+### 架构优势
+
+- ✅ **职责分离**：API 层只负责 HTTP 调用，业务层处理 mock 和降级逻辑
+- ✅ **灵活切换**：通过 `USE_MOCK` 环境变量控制模式
+- ✅ **数据可靠**：API 失败自动降级到 localStorage
+- ✅ **易于测试**：开发时使用 mock，生产使用真实 API
 
 ## 文件结构
 
 ```
 packages/main-app/src/
 ├── api/
-│   └── layout.js          # 布局管理 API 封装
+│   └── layout.js          # 布局管理 API（纯 HTTP 调用）
+├── composables/
+│   └── useLayout.js       # 布局业务逻辑（mock/API 切换、降级策略）
 ├── views/
-│   └── MultiInstancePage.vue  # 多应用同屏页（使用 API）
+│   └── MultiInstancePage.vue  # 多应用同屏页（使用 composable）
 └── ..env.*                # 环境配置文件
 ```
 
@@ -25,21 +33,21 @@ packages/main-app/src/
 
 ```bash
 # 默认使用 localStorage（mock 模式）
-VITE_USE_LAYOUT_API=false
+VITE_USE_MOCK=true
 ```
 
 ### Mock 环境 (`.env.mock`)
 
 ```bash
 # 强制使用 localStorage（用于产品演示、离线开发）
-VITE_USE_LAYOUT_API=false
+VITE_USE_MOCK=true
 ```
 
 ### 生产环境 (`.env.production`)
 
 ```bash
 # 强制使用后端 API
-VITE_USE_LAYOUT_API=true
+VITE_USE_MOCK=false
 ```
 
 ## API 接口规范
@@ -117,20 +125,21 @@ API 模式：
 
 ## 使用示例
 
-### 在组件中使用
+### 推荐使用方式（Composable）
 
 ```javascript
-import { saveLayoutAPI, loadLayoutAPI } from '@/api/layout'
+// 使用 Composable（推荐 - 包含 mock/API 模式切换、localStorage 降级策略）
+import { saveLayout, loadLayout } from '@/composables/useLayout'
 
 // 保存布局
-async function saveLayout() {
+async function saveLayoutData() {
   const data = {
     layoutMode: 'grid-free',
     panels: [...]
   }
   
   try {
-    const result = await saveLayoutAPI(data)
+    const result = await saveLayout(data)
     console.log('保存成功:', result)
   } catch (error) {
     console.error('保存失败:', error)
@@ -138,12 +147,34 @@ async function saveLayout() {
 }
 
 // 加载布局
-async function restoreLayout() {
-  const data = await loadLayoutAPI()
+async function loadLayoutData() {
+  const data = await loadLayout()
   if (data) {
     // 恢复布局
     console.log('加载的布局:', data)
   }
+}
+```
+
+### 直接使用 API（不推荐）
+
+如果只需要纯 HTTP 调用（不包含 mock 切换和降级逻辑），可以直接使用 API：
+
+```javascript
+// 直接使用 API（仅纯 HTTP 调用，无业务逻辑）
+import { saveLayoutAPI, loadLayoutAPI } from '@/api/layout'
+
+// 保存布局
+async function saveDirect() {
+  const data = { layoutMode: 'grid-free', panels: [...] }
+  const result = await saveLayoutAPI(data)
+  return result
+}
+
+// 加载布局
+async function loadDirect() {
+  const data = await loadLayoutAPI()
+  return data
 }
 ```
 

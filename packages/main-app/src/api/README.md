@@ -13,9 +13,11 @@
 ```
 packages/main-app/src/
 ├── api/
-│   └── layout.js          # 布局管理 API 封装
+│   └── layout.js          # 布局管理 API（纯 HTTP 调用）
+├── composables/
+│   └── useLayout.js       # 布局业务逻辑（mock/API 切换、降级策略）
 ├── views/
-│   └── MultiInstancePage.vue  # 多应用同屏页（使用 API）
+│   └── MultiInstancePage.vue  # 多应用同屏页（使用 composable）
 └── ..env.*                # 环境配置文件
 ```
 
@@ -120,17 +122,18 @@ API 模式：
 ### 在组件中使用
 
 ```javascript
-import { saveLayoutAPI, loadLayoutAPI } from '@/api/layout'
+// 使用 Composable（推荐 - 包含 mock/API 模式切换、localStorage 降级策略）
+import { saveLayout, loadLayout } from '@/composables/useLayout'
 
 // 保存布局
-async function saveLayout() {
+async function save() {
   const data = {
     layoutMode: 'grid-free',
     panels: [...]
   }
   
   try {
-    const result = await saveLayoutAPI(data)
+    const result = await saveLayout(data)
     console.log('保存成功:', result)
   } catch (error) {
     console.error('保存失败:', error)
@@ -138,12 +141,30 @@ async function saveLayout() {
 }
 
 // 加载布局
-async function restoreLayout() {
-  const data = await loadLayoutAPI()
+async function restore() {
+  const data = await loadLayout()
   if (data) {
     // 恢复布局
     console.log('加载的布局:', data)
   }
+}
+
+// ---
+
+// 直接使用 API（仅纯 HTTP 调用，无业务逻辑）
+import { saveLayoutAPI, loadLayoutAPI } from '@/api/layout'
+
+// 保存布局
+async function saveDirect() {
+  const data = { layoutMode: 'grid-free', panels: [...] }
+  const result = await saveLayoutAPI(data)
+  return result
+}
+
+// 加载布局
+async function loadDirect() {
+  const data = await loadLayoutAPI()
+  return data
 }
 ```
 
